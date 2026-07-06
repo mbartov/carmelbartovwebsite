@@ -1,26 +1,63 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-ink: #161614;
+  --color-cream: #f7ead1;
+  --color-pink: #d9458e;
+  --color-pink-bright: #e01c78;
+  --color-purple: #8b57de;
+  --color-green: #317427;
+  --color-orange: #e8531d;
+  --color-yellow: #f9ae4b;
+  --color-blue: #2aa6e0;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ink: var(--color-ink);
+  --color-cream: var(--color-cream);
+  --color-pink: var(--color-pink);
+  --color-pink-bright: var(--color-pink-bright);
+  --color-purple: var(--color-purple);
+  --color-green: var(--color-green);
+  --color-orange: var(--color-orange);
+  --color-yellow: var(--color-yellow);
+  --color-blue: var(--color-blue);
+  --font-display: var(--font-display);
+  --font-sans: var(--font-body);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-ink);
+  color: var(--color-cream);
+}
+
+::selection {
+  background: var(--color-yellow);
+  color: var(--color-ink);
+}
+
+.stroke-ink {
+  -webkit-text-stroke: 2px var(--color-ink);
+  paint-order: stroke fill;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 22s linear infinite;
+}
+
+.ticket-scallop {
+  border-radius: 20px;
 }
