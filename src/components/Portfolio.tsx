@@ -1,16 +1,16 @@
 import VideoTicketCard from "./VideoTicketCard";
 import StackReveal from "./StackReveal";
+import { VideoPlaybackProvider } from "./VideoPlaybackContext";
 
 const reels: {
   videoId: string;
-  category: string;
   title: string;
   color: "pink" | "green" | "orange" | "purple";
 }[] = [
-  { videoId: "XrR7Gh5Jmcs", category: "Social content", title: "REEL 01", color: "pink" },
-  { videoId: "SnEmOxlB-EA", category: "Behind the scenes", title: "REEL 02", color: "green" },
-  { videoId: "M_4yjkXI_yI", category: "Video editing", title: "REEL 03", color: "orange" },
-  { videoId: "5zJyrTAYKLU", category: "Content creation", title: "REEL 04", color: "purple" },
+  { videoId: "XrR7Gh5Jmcs", title: "REEL 01", color: "pink" },
+  { videoId: "SnEmOxlB-EA", title: "REEL 02", color: "green" },
+  { videoId: "M_4yjkXI_yI", title: "REEL 03", color: "orange" },
+  { videoId: "5zJyrTAYKLU", title: "REEL 04", color: "purple" },
 ];
 
 export default function Portfolio() {
@@ -26,11 +26,13 @@ export default function Portfolio() {
           EXPLORE MY CREATIVE SHOWCASE
         </h2>
 
-        <StackReveal className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {reels.map((reel) => (
-            <VideoTicketCard key={reel.videoId} {...reel} />
-          ))}
-        </StackReveal>
+        <VideoPlaybackProvider>
+          <StackReveal className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {reels.map((reel) => (
+              <VideoTicketCard key={reel.videoId} {...reel} />
+            ))}
+          </StackReveal>
+        </VideoPlaybackProvider>
 
         <div className="mt-14 flex justify-center">
           <a

@@ -1,7 +1,7 @@
 "use client";
 
 import * as THREE from "three";
-import { Suspense, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, extend, useFrame, useThree } from "@react-three/fiber";
 import { Environment, Lightformer, Text, useTexture } from "@react-three/drei";
 import {
@@ -121,13 +121,26 @@ const ROPE_SEGMENT = 0.5;
 // rope's end point never overlaps the card mesh — that overlap was causing
 // z-fighting/flicker between the band and the card surface as it swung.
 const CARD_OFFSET = CARD_HEIGHT / 2 + 0.15 * BADGE_SCALE;
-const ANCHOR_X = 2.2;
+const ANCHOR_X_DESKTOP = 2.2;
+const ANCHOR_X_MOBILE = 0;
 const ANCHOR_Y = 2.3;
 
 const WIND_IMPULSE_SCALE = 0.9;
 const WIND_STILL_THRESHOLD = 0.4;
 
-function Lanyard() {
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia("(max-width: 639px)");
+    setIsMobile(mql.matches);
+    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+  return isMobile;
+}
+
+function Lanyard({ anchorX }: { anchorX: number }) {
   const cardGeometry = useCardGeometry();
   const band = useRef<THREE.Mesh<MeshLineGeometry, MeshLineMaterial>>(null!);
   const fixed = useRef<RapierRigidBody>(null!);
@@ -215,9 +228,9 @@ function Lanyard() {
 
   return (
     <>
-      <RigidBody ref={fixed} position={[ANCHOR_X, ANCHOR_Y, 0]} type="fixed" />
+      <RigidBody ref={fixed} position={[anchorX, ANCHOR_Y, 0]} type="fixed" />
       <RigidBody
-        position={[ANCHOR_X + ROPE_SEGMENT * 0.5, ANCHOR_Y, 0]}
+        position={[anchorX + ROPE_SEGMENT * 0.5, ANCHOR_Y, 0]}
         ref={j1}
         linearDamping={2}
         angularDamping={2}
@@ -226,7 +239,7 @@ function Lanyard() {
         <BallCollider args={[0.06]} />
       </RigidBody>
       <RigidBody
-        position={[ANCHOR_X + ROPE_SEGMENT, ANCHOR_Y, 0]}
+        position={[anchorX + ROPE_SEGMENT, ANCHOR_Y, 0]}
         ref={j2}
         linearDamping={2}
         angularDamping={2}
@@ -235,7 +248,7 @@ function Lanyard() {
         <BallCollider args={[0.06]} />
       </RigidBody>
       <RigidBody
-        position={[ANCHOR_X + ROPE_SEGMENT * 1.5, ANCHOR_Y, 0]}
+        position={[anchorX + ROPE_SEGMENT * 1.5, ANCHOR_Y, 0]}
         ref={j3}
         linearDamping={2}
         angularDamping={2}
@@ -244,7 +257,7 @@ function Lanyard() {
         <BallCollider args={[0.06]} />
       </RigidBody>
       <RigidBody
-        position={[ANCHOR_X + ROPE_SEGMENT * 1.5, ANCHOR_Y - CARD_OFFSET, 0]}
+        position={[anchorX + ROPE_SEGMENT * 1.5, ANCHOR_Y - CARD_OFFSET, 0]}
         ref={card}
         angularDamping={4}
         linearDamping={4}
@@ -318,18 +331,21 @@ function Lanyard() {
 }
 
 export default function Badge3D() {
+  const isMobile = useIsMobile();
+  const anchorX = isMobile ? ANCHOR_X_MOBILE : ANCHOR_X_DESKTOP;
+
   return (
-    <div className="pointer-events-auto absolute inset-0 touch-none">
+    <div className="pointer-events-auto absolute inset-0 touch-pan-y sm:touch-none">
       <Canvas camera={{ position: [0, 0, 13], fov: 25 }}>
         <ambientLight intensity={0.9} />
         <directionalLight position={[5, 6, 5]} intensity={1} />
         {/* headlight: travels with the camera so whichever face is toward the
             viewer stays lit, even as the badge swings on the lanyard */}
         <pointLight position={[0, 0, 12]} intensity={5} decay={0} />
-        <pointLight position={[ANCHOR_X, ANCHOR_Y - 1.5, 9]} intensity={3} decay={0} />
+        <pointLight position={[anchorX, ANCHOR_Y - 1.5, 9]} intensity={3} decay={0} />
         <Suspense fallback={null}>
           <Physics gravity={[0, -32, 0]} interpolate>
-            <Lanyard />
+            <Lanyard anchorX={anchorX} />
           </Physics>
         </Suspense>
         <Environment resolution={64}>

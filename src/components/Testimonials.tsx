@@ -7,15 +7,15 @@ const quotes = [
   {
     quote:
       "Fast, precise, and genuinely creative. Carmel understood the story we needed before we did.",
-    name: "NOA LEVI",
-    role: "MARKETING LEAD",
+    name: "AVIA ROZALIO",
+    role: "COLONEL, IDF SPOKESMAN",
     bg: "bg-pink-bright",
   },
   {
     quote:
-      "Every deadline met, every note nailed. The safest pair of hands I've handed footage to.",
-    name: "AMIT SHAHAR",
-    role: "CONTENT MANAGER",
+      "She is a dedicated team member who contributes a lot to a film's success.",
+    name: "YARON ROTENBERG",
+    role: "FILM TEACHER",
     bg: "bg-orange",
   },
   {

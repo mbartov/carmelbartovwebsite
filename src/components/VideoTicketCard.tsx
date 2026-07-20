@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+import { loadYouTubeIframeApi, type YTPlayer } from "@/lib/youtubeIframeApi";
+import { useVideoPlayback } from "./VideoPlaybackContext";
 
 const colorMap: Record<string, string> = {
   pink: "bg-pink-bright",
@@ -13,57 +14,170 @@ const colorMap: Record<string, string> = {
 
 type Props = {
   videoId: string;
-  category: string;
   title: string;
   color: keyof typeof colorMap;
 };
 
-export default function VideoTicketCard({ videoId, category, title, color }: Props) {
-  const [playing, setPlaying] = useState(false);
+export default function VideoTicketCard({
+  videoId,
+  title,
+  color,
+}: Props) {
+  const { activeId, play, stop } = useVideoPlayback();
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mountWrapperRef = useRef<HTMLDivElement | null>(null);
+  const playerRef = useRef<YTPlayer | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isHoverCapable, setIsHoverCapable] = useState(false);
+
+  useEffect(() => {
+    setIsHoverCapable(
+      window.matchMedia("(hover: hover) and (pointer: fine)").matches
+    );
+  }, []);
+
+  // Mount the player immediately (not gated behind a click) so the iframe and
+  // its player script are already warmed up by the time the user wants to
+  // watch — this is the "preload" for instant start/stop.
+  //
+  // YT.Player destructively replaces its target element with an iframe, and
+  // destroy() only removes that iframe (it doesn't restore the original
+  // element). React 18 Strict Mode runs this effect twice on mount (setup,
+  // cleanup, setup again) — reusing a static target id broke the second
+  // construction, since by then the first destroy() had already removed the
+  // only element with that id. Creating a fresh child element per effect run
+  // sidesteps that entirely.
+  useEffect(() => {
+    let cancelled = false;
+    const wrapper = mountWrapperRef.current;
+    if (!wrapper) return;
+    const target = document.createElement("div");
+    target.className = "absolute inset-0 h-full w-full";
+    wrapper.appendChild(target);
+
+    loadYouTubeIframeApi().then((YT) => {
+      if (cancelled) return;
+      playerRef.current = new YT.Player(target, {
+        videoId,
+        playerVars: { rel: 0, playsinline: 1, modestbranding: 1 },
+        events: {
+          onStateChange: (event) => {
+            if (event.data === YT.PlayerState.PLAYING) {
+              setIsPlaying(true);
+              play(videoId);
+            } else if (
+              event.data === YT.PlayerState.PAUSED ||
+              event.data === YT.PlayerState.ENDED
+            ) {
+              setIsPlaying(false);
+              stop(videoId);
+            }
+          },
+        },
+      });
+    });
+    return () => {
+      cancelled = true;
+      playerRef.current?.destroy();
+      playerRef.current = null;
+      target.remove();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [videoId]);
+
+  // Only one reel plays at a time: pause as soon as a different card claims
+  // the active slot.
+  useEffect(() => {
+    if (activeId !== videoId && isPlaying) {
+      playerRef.current?.pauseVideo();
+    }
+  }, [activeId, videoId, isPlaying]);
+
+  // Mobile/touch: autoplay once 60%+ of the card is in view.
+  useEffect(() => {
+    if (isHoverCapable) return;
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!playerRef.current) return;
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+          playerRef.current.mute();
+          playerRef.current.playVideo();
+        } else {
+          playerRef.current.pauseVideo();
+        }
+      },
+      { threshold: [0, 0.6, 1] }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isHoverCapable]);
+
+  const handleMouseEnter = () => {
+    if (!isHoverCapable) return;
+    playerRef.current?.mute();
+    playerRef.current?.playVideo();
+  };
+
+  const handleMouseLeave = () => {
+    if (!isHoverCapable) return;
+    playerRef.current?.pauseVideo();
+  };
+
+  const handlePlayClick = () => {
+    if (isPlaying) {
+      playerRef.current?.pauseVideo();
+      return;
+    }
+    playerRef.current?.unMute();
+    playerRef.current?.playVideo();
+  };
 
   return (
     <div
       className={`ticket-scallop flex flex-col border-[3px] border-ink p-4 text-ink ${colorMap[color]}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div className="flex items-center justify-between text-[10px] font-medium uppercase tracking-widest sm:text-xs">
         <span>Now screening</span>
         <span>Full HD</span>
       </div>
 
-      <div className="relative mt-3 aspect-[9/16] w-full overflow-hidden rounded-lg border-2 border-ink bg-ink">
-        {playing ? (
-          <iframe
-            className="absolute inset-0 h-full w-full"
-            src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`}
-            title={title}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        ) : (
-          <button
-            type="button"
-            onClick={() => setPlaying(true)}
-            className="group absolute inset-0 flex items-center justify-center"
-            aria-label={`Play ${title}`}
-          >
-            <Image
-              src={`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`}
-              alt={title}
-              fill
-              sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-              className="object-cover opacity-90 transition-opacity group-hover:opacity-100"
-            />
-            <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-cream text-ink shadow-lg transition-transform group-hover:scale-110">
-              &#9654;
-            </span>
-          </button>
-        )}
-      </div>
+      <div
+        ref={containerRef}
+        className="relative mt-3 aspect-[9/16] w-full overflow-hidden rounded-lg border-2 border-ink bg-ink"
+      >
+        <div ref={mountWrapperRef} className="absolute inset-0 h-full w-full" />
 
-      <p className="mt-3 text-xs font-medium uppercase tracking-widest opacity-70">
-        {category}
-      </p>
-      <p className="font-display text-2xl leading-none sm:text-3xl">{title}</p>
+        {/* The live YouTube embed (always mounted, see effect above) shows
+            its own correctly-aspected paused thumbnail underneath — a static
+            hqdefault.jpg was tried here first, but for these Shorts it comes
+            back as a 4:3 frame with YouTube's own player chrome baked in,
+            which object-cover had to crop/zoom hard into a 9:16 box. That
+            distortion is what read as "stretched", worse on the bigger
+            mobile card size. */}
+        <button
+          type="button"
+          onClick={handlePlayClick}
+          className="group absolute inset-0 flex items-center justify-center"
+          aria-label={isPlaying ? `Pause ${title}` : `Play ${title}`}
+        >
+          <span
+            className={`absolute inset-0 bg-ink/30 transition-opacity ${
+              isPlaying ? "opacity-0 group-hover:opacity-100" : "opacity-100"
+            }`}
+          />
+          <span
+            className={`relative flex h-14 w-14 items-center justify-center rounded-full bg-cream text-ink shadow-lg transition-all group-hover:scale-110 ${
+              isPlaying ? "opacity-0 group-hover:opacity-100" : "opacity-100"
+            }`}
+          >
+            {isPlaying ? <>&#10074;&#10074;</> : <>&#9654;</>}
+          </span>
+        </button>
+      </div>
 
       <div className="mt-4 flex items-center justify-between border-t-2 border-dotted border-ink/50 pt-3 text-[10px] uppercase tracking-widest opacity-70">
         <span>Live from the edit bay</span>

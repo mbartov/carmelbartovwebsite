@@ -4,9 +4,15 @@ import { motion } from "framer-motion";
 
 const milestones = [
   {
+    range: "2020 – 2024",
+    title: "FREELANCE VIDEO EDITOR AND PRODUCER",
+    meta: "FREELANCE",
+    color: "bg-blue",
+  },
+  {
     range: "2024 – 2026",
-    title: "IDF SPOKESPERSON'S UNIT",
-    meta: "VIDEO EDITOR, DIGITAL CONTENT",
+    title: "VIDEO EDITOR, DIGITAL CONTENT",
+    meta: "IDF SPOKESPERSON'S UNIT",
     color: "bg-orange",
   },
   {

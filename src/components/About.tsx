@@ -10,61 +10,64 @@ function MicIcon() {
 
 const instruments: { label: string; bg: string; icon: React.ReactNode }[] = [
   {
-    label: "Keys",
+    label: "MacBook",
     bg: "bg-purple",
     icon: (
       <svg viewBox="0 0 64 64" className="h-12 w-16" fill="none" stroke="currentColor" strokeWidth="2.5">
-        <rect x="6" y="18" width="52" height="28" rx="4" />
-        {[16, 26, 36, 46].map((x) => (
-          <line key={x} x1={x} y1="18" x2={x} y2="46" />
-        ))}
+        <rect x="10" y="12" width="44" height="28" rx="3" />
+        <line x1="10" y1="34" x2="54" y2="34" />
+        <path d="M4 48h56l-6 8H10z" />
       </svg>
     ),
   },
   {
-    label: "Strings",
+    label: "Camera",
     bg: "bg-blue",
     icon: (
       <svg viewBox="0 0 64 64" className="h-14 w-14" fill="none" stroke="currentColor" strokeWidth="2.5">
-        <path d="M14 12v20a18 18 0 0 0 36 0V12" />
-        <line x1="20" y1="14" x2="20" y2="30" />
-        <line x1="32" y1="10" x2="32" y2="34" />
-        <line x1="44" y1="14" x2="44" y2="30" />
-        <rect x="24" y="50" width="16" height="6" rx="1" />
+        <rect x="8" y="18" width="40" height="28" rx="4" />
+        <path d="M20 18l4-8h8l4 8" />
+        <path d="M48 26l10-6v22l-10-6z" />
+        <circle cx="28" cy="32" r="8" />
       </svg>
     ),
   },
   {
-    label: "Drum",
+    label: "Microphone",
     bg: "bg-pink-bright",
     icon: (
-      <svg viewBox="0 0 64 64" className="h-14 w-14" fill="none" stroke="currentColor" strokeWidth="2.5">
-        <ellipse cx="32" cy="18" rx="22" ry="8" />
-        <path d="M10 18v18c0 4.4 9.8 8 22 8s22-3.6 22-8V18" />
+      <svg viewBox="0 0 64 64" className="h-14 w-14" fill="none" stroke="currentColor" strokeWidth="3">
+        <rect x="24" y="6" width="16" height="30" rx="8" />
+        <path d="M16 28a16 16 0 0 0 32 0" />
+        <path d="M32 44v10M22 54h20" strokeLinecap="round" />
       </svg>
     ),
   },
   {
-    label: "Sax",
+    label: "Audio Mixer",
     bg: "bg-green",
     icon: (
       <svg viewBox="0 0 64 64" className="h-14 w-14" fill="none" stroke="currentColor" strokeWidth="2.5">
-        <path d="M24 8h14v22" />
-        <path d="M38 30a12 12 0 1 1 -16 11" />
-        <circle cx="26" cy="24" r="1.5" fill="currentColor" />
-        <circle cx="26" cy="30" r="1.5" fill="currentColor" />
-        <circle cx="26" cy="36" r="1.5" fill="currentColor" />
+        <rect x="8" y="8" width="48" height="48" rx="4" />
+        <line x1="20" y1="16" x2="20" y2="40" />
+        <circle cx="20" cy="24" r="3" fill="currentColor" />
+        <line x1="32" y1="16" x2="32" y2="40" />
+        <circle cx="32" cy="32" r="3" fill="currentColor" />
+        <line x1="44" y1="16" x2="44" y2="40" />
+        <circle cx="44" cy="20" r="3" fill="currentColor" />
+        <line x1="14" y1="48" x2="50" y2="48" />
       </svg>
     ),
   },
   {
-    label: "Guitar",
+    label: "Stage Light",
     bg: "bg-orange",
     icon: (
       <svg viewBox="0 0 64 64" className="h-14 w-14" fill="none" stroke="currentColor" strokeWidth="2.5">
-        <line x1="32" y1="6" x2="32" y2="34" />
-        <circle cx="32" cy="46" r="14" />
-        <circle cx="32" cy="46" r="5" />
+        <path d="M20 10h24l-4 20H24z" />
+        <line x1="24" y1="30" x2="40" y2="30" />
+        <path d="M22 30l-8 24M42 30l8 24" />
+        <line x1="20" y1="54" x2="44" y2="54" />
       </svg>
     ),
   },
