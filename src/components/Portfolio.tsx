@@ -1,29 +1,63 @@
+"use client";
+
 import VideoTicketCard from "./VideoTicketCard";
 import StackReveal from "./StackReveal";
 import { VideoPlaybackProvider } from "./VideoPlaybackContext";
+import { useLanguage } from "./LanguageContext";
 
-const reels: {
-  videoId: string;
-  title: string;
-  color: "pink" | "green" | "orange" | "purple";
-}[] = [
-  { videoId: "XrR7Gh5Jmcs", title: "REEL 01", color: "pink" },
-  { videoId: "SnEmOxlB-EA", title: "REEL 02", color: "green" },
-  { videoId: "M_4yjkXI_yI", title: "REEL 03", color: "orange" },
-  { videoId: "5zJyrTAYKLU", title: "REEL 04", color: "purple" },
-];
+const reelsByLang = {
+  en: [
+    { videoId: "XrR7Gh5Jmcs", title: "REEL 01", color: "pink" },
+    { videoId: "SnEmOxlB-EA", title: "REEL 02", color: "green" },
+    { videoId: "M_4yjkXI_yI", title: "REEL 03", color: "orange" },
+    { videoId: "5zJyrTAYKLU", title: "REEL 04", color: "purple" },
+  ],
+  he: [
+    { videoId: "XrR7Gh5Jmcs", title: "קליפ 01", color: "pink" },
+    { videoId: "SnEmOxlB-EA", title: "קליפ 02", color: "green" },
+    { videoId: "M_4yjkXI_yI", title: "קליפ 03", color: "orange" },
+    { videoId: "5zJyrTAYKLU", title: "קליפ 04", color: "purple" },
+  ],
+} as const;
+
+const copy = {
+  en: {
+    kicker: "[ Your ticket to visual storytelling ]",
+    heading: (
+      <>
+        COME ON IN:
+        <br />
+        EXPLORE MY CREATIVE SHOWCASE
+      </>
+    ),
+    cta: "Check out more projects",
+  },
+  he: {
+    kicker: "[ הכרטיס שלכם לסיפור חזותי ]",
+    heading: (
+      <>
+        בואו פנימה:
+        <br />
+        גלו את התצוגה היצירתית שלי
+      </>
+    ),
+    cta: "לצפייה בעוד פרויקטים",
+  },
+};
 
 export default function Portfolio() {
+  const { lang } = useLanguage();
+  const reels = reelsByLang[lang];
+  const t = copy[lang];
+
   return (
     <section id="portfolio" className="bg-ink px-6 py-24 sm:px-10">
       <div className="mx-auto max-w-6xl">
         <p className="mb-4 text-sm uppercase tracking-widest text-cream/60">
-          [ Your ticket to visual storytelling ]
+          {t.kicker}
         </p>
         <h2 className="mb-12 font-display text-4xl leading-[0.95] sm:text-5xl md:text-6xl">
-          COME ON IN:
-          <br />
-          EXPLORE MY CREATIVE SHOWCASE
+          {t.heading}
         </h2>
 
         <VideoPlaybackProvider>
@@ -41,7 +75,7 @@ export default function Portfolio() {
             rel="noopener noreferrer"
             className="rounded-full bg-yellow px-8 py-4 font-medium text-ink transition-transform hover:-translate-y-0.5"
           >
-            Check out more projects
+            {t.cta}
           </a>
         </div>
       </div>

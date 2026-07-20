@@ -1,3 +1,7 @@
+"use client";
+
+import { useLanguage } from "./LanguageContext";
+
 function MicIcon() {
   return (
     <svg viewBox="0 0 64 64" className="h-14 w-14" fill="none" stroke="currentColor" strokeWidth="3">
@@ -73,7 +77,53 @@ const instruments: { label: string; bg: string; icon: React.ReactNode }[] = [
   },
 ];
 
+const copy = {
+  en: {
+    ticketBody:
+      "I'm Carmel, your backstage pass to unforgettable video experiences.",
+    ticketTitle: (
+      <>
+        CARMEL BARTOV &mdash;
+        <br />
+        BEHIND THE SCENES
+      </>
+    ),
+    admission: "General admission",
+    bio: "I'm Carmel Bartov, a video editor with several years of experience in content creation and video editing. During my service in the IDF Spokesperson's Unit, I edited digital content while collaborating with senior officers — a fast-paced environment that demanded precision, creativity, and the ability to meet tight deadlines. I believe every video should tell a story, capture the viewer's attention, and leave a lasting impression.",
+    currentlyEditing: (
+      <>
+        CURRENTLY EDITING
+        <br />
+        FOR CREATORS &amp; BRANDS
+      </>
+    ),
+    hoverHint: "[ Hover the icons — they like to dance ]",
+  },
+  he: {
+    ticketBody: "אני כרמל, כרטיס ה-VIP שלך לחוויות וידאו בלתי נשכחות.",
+    ticketTitle: (
+      <>
+        CARMEL BARTOV &mdash;
+        <br />
+        מאחורי הקלעים
+      </>
+    ),
+    admission: "כניסה כללית",
+    bio: 'אני כרמל ברטוב, עורכת וידאו עם ניסיון של מספר שנים ביצירת תוכן ועריכת וידאו. במהלך שירותי ביחידת דובר צה"ל ערכתי תוכן דיגיטלי תוך שיתוף פעולה עם קצינים בכירים — סביבה קצבית שדרשה דיוק, יצירתיות ויכולת לעמוד בלוחות זמנים צפופים. אני מאמינה שכל סרטון צריך לספר סיפור, לתפוס את תשומת הלב של הצופה ולהשאיר רושם בל יימחה.',
+    currentlyEditing: (
+      <>
+        כרגע עורכת
+        <br />
+        עבור יוצרים ומותגים
+      </>
+    ),
+    hoverHint: "[ רחפו מעל האייקונים — הם אוהבים לרקוד ]",
+  },
+};
+
 export default function About() {
+  const { lang } = useLanguage();
+  const t = copy[lang];
   return (
     <section id="about" className="bg-ink px-6 py-24 sm:px-10">
       <div className="mx-auto max-w-5xl">
@@ -86,37 +136,23 @@ export default function About() {
           }}
         >
           <div className="flex-1">
-            <p className="max-w-xs text-sm sm:text-base">
-              I&apos;m Carmel, your backstage pass to unforgettable video
-              experiences.
-            </p>
+            <p className="max-w-xs text-sm sm:text-base">{t.ticketBody}</p>
             <p className="mt-6 font-display text-2xl leading-none sm:text-3xl">
-              CARMEL BARTOV &mdash;
-              <br />
-              BEHIND THE SCENES
+              {t.ticketTitle}
             </p>
           </div>
           <MicIcon />
           <p className="hidden -rotate-90 whitespace-nowrap text-xs uppercase tracking-[0.3em] sm:block">
-            General admission
+            {t.admission}
           </p>
         </div>
 
         <p className="mx-auto max-w-2xl text-center text-lg leading-relaxed text-cream/90 sm:text-xl">
-          I&apos;m Carmel Bartov, a video editor with several years of
-          experience in content creation and video editing. During my
-          service in the IDF Spokesperson&apos;s Unit, I edited digital
-          content while collaborating with senior officers &mdash; a
-          fast-paced environment that demanded precision, creativity, and
-          the ability to meet tight deadlines. I believe every video should
-          tell a story, capture the viewer&apos;s attention, and leave a
-          lasting impression.
+          {t.bio}
         </p>
 
         <p className="mt-16 text-center font-display text-3xl leading-tight sm:text-4xl">
-          CURRENTLY EDITING
-          <br />
-          FOR CREATORS &amp; BRANDS
+          {t.currentlyEditing}
         </p>
 
         <div className="mt-16 flex flex-wrap items-end justify-center gap-8 sm:gap-10">
@@ -130,7 +166,7 @@ export default function About() {
           ))}
         </div>
         <p className="mt-8 text-center text-sm uppercase tracking-widest text-cream/50">
-          [ Hover the icons &mdash; they like to dance ]
+          {t.hoverHint}
         </p>
       </div>
     </section>

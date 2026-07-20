@@ -1,38 +1,74 @@
-import StackReveal from "./StackReveal";
+"use client";
 
-const services = [
-  {
-    name: "SOCIAL REELS",
-    bg: "bg-orange",
-    body: "Short-form, scroll-stopping cuts built for Instagram, TikTok, and YouTube Shorts.",
+import { serviceTagsByLang } from "@/lib/services";
+import StackReveal from "./StackReveal";
+import { useLanguage } from "./LanguageContext";
+
+const bodiesByLang = {
+  en: [
+    "Short-form, scroll-stopping cuts built for Instagram, TikTok, and YouTube Shorts.",
+    "Interviews, documentaries, and brand films edited for pacing and clarity.",
+    "Short-film storyline editing, filming, editing and social clips.",
+    "Clean audio, mixed dialogue, and sound that supports the story.",
+  ],
+  he: [
+    "עריכות קצרות שעוצרות גלילה, בנויות לאינסטגרם, טיקטוק ויוטיוב שורטס.",
+    "ראיונות, סרטים תיעודיים וסרטי מותג, ערוכים לקצב ובהירות.",
+    "עריכת עלילת סרט קצר, צילום, עריכה וקליפים לרשתות.",
+    "אודיו נקי, דיאלוג ממוקסס וסאונד שתומך בסיפור.",
+  ],
+};
+
+const bgs = ["bg-orange", "bg-green", "bg-pink-bright", "bg-blue"] as const;
+
+function servicesFor(lang: keyof typeof serviceTagsByLang) {
+  return serviceTagsByLang[lang].map((name, i) => ({
+    name: lang === "en" ? name.toUpperCase() : name,
+    bg: bgs[i],
+    body: bodiesByLang[lang][i],
+  }));
+}
+
+const copy = {
+  en: {
+    heading: "THE FULL SETLIST: MY EDITING SERVICES",
+    sub: "[ From social reels to full campaigns, I offer a complete range of editing services to make your story shine ]",
+    ctaHeading: (
+      <>
+        DID NOT FIND
+        <br />
+        WHAT YOU NEED?
+      </>
+    ),
+    cta: "Let's talk",
   },
-  {
-    name: "LONG-FORM EDITS",
-    bg: "bg-green",
-    body: "Interviews, documentaries, and brand films edited for pacing and clarity.",
+  he: {
+    heading: "רשימת השירותים שלי",
+    sub: "[ מרילז ברשתות ועד קמפיינים מלאים, אני מציעה מגוון שלם של שירותי עריכה שיגרמו לסיפור שלכם לזרוח ]",
+    ctaHeading: (
+      <>
+        לא מצאתם
+        <br />
+        מה שאתם צריכים?
+      </>
+    ),
+    cta: "בואו נדבר",
   },
-  {
-    name: "SHORT FILM PRODUCTION",
-    bg: "bg-pink-bright",
-    body: "Short-film storyline editing, filming, editing and social clips.",
-  },
-  {
-    name: "PODCAST PRODUCTION",
-    bg: "bg-blue",
-    body: "Clean audio, mixed dialogue, and sound that supports the story.",
-  },
-];
+};
 
 export default function Services() {
+  const { lang } = useLanguage();
+  const services = servicesFor(lang);
+  const t = copy[lang];
+
   return (
     <section id="services" className="bg-ink px-6 py-24 sm:px-10">
       <div className="mx-auto max-w-6xl">
         <h2 className="text-center font-display text-4xl leading-[0.95] sm:text-5xl md:text-6xl">
-          THE FULL SETLIST: MY EDITING SERVICES
+          {t.heading}
         </h2>
         <p className="mx-auto mt-6 max-w-xl text-center text-cream/70">
-          [ From social reels to full campaigns, I offer a complete range of
-          editing services to make your story shine ]
+          {t.sub}
         </p>
 
         <StackReveal className="mt-16 flex flex-wrap justify-center gap-12">
@@ -57,15 +93,13 @@ export default function Services() {
               className="flex aspect-[5/7] w-[22rem] flex-col items-center justify-center gap-8 rounded-[2rem] border-2 border-cream/10 bg-purple px-12 py-16 text-center text-cream shadow-lg"
             >
               <span className="font-display text-4xl leading-tight">
-                DID NOT FIND
-                <br />
-                WHAT YOU NEED?
+                {t.ctaHeading}
               </span>
               <a
                 href="mailto:hello@carmel.video"
                 className="rounded-full bg-cream px-10 py-4 text-lg font-medium text-ink"
               >
-                Let&apos;s talk
+                {t.cta}
               </a>
             </div>,
           ]}

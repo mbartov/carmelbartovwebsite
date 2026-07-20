@@ -1,46 +1,83 @@
-import StackReveal from "./StackReveal";
+"use client";
 
-const steps: {
-  title: string;
-  body: string;
-  bar: string;
-}[] = [
-  {
-    title: "Initial contact",
-    body: "Reach out on email or through the form — tell me what you're making and when you need it.",
-    bar: "bg-orange",
-  },
-  {
-    title: "Brief discovery call",
-    body: "A short call to nail the goal, the audience, the tone, and the deadline.",
-    bar: "bg-pink-bright",
-  },
-  {
-    title: "Video editing",
-    body: "I build the story — structure, pacing, sound, and color — into a first cut you can react to.",
-    bar: "bg-purple",
-  },
-  {
-    title: "Revision rounds",
-    body: "Focused feedback loops until every frame earns its place.",
-    bar: "bg-green",
-  },
-  {
-    title: "Final delivery",
-    body: "Master files exported for every platform you publish on — delivered on time.",
-    bar: "bg-blue",
-  },
-];
+import StackReveal from "./StackReveal";
+import { useLanguage } from "./LanguageContext";
+
+const stepsByLang = {
+  en: [
+    {
+      title: "Initial contact",
+      body: "Reach out on email or through the form — tell me what you're making and when you need it.",
+      bar: "bg-orange",
+    },
+    {
+      title: "Brief discovery call",
+      body: "A short call to nail the goal, the audience, the tone, and the deadline.",
+      bar: "bg-pink-bright",
+    },
+    {
+      title: "Video editing",
+      body: "I build the story — structure, pacing, sound, and color — into a first cut you can react to.",
+      bar: "bg-purple",
+    },
+    {
+      title: "Revision rounds",
+      body: "Focused feedback loops until every frame earns its place.",
+      bar: "bg-green",
+    },
+    {
+      title: "Final delivery",
+      body: "Master files exported for every platform you publish on — delivered on time.",
+      bar: "bg-blue",
+    },
+  ],
+  he: [
+    {
+      title: "יצירת קשר ראשונית",
+      body: "צרו קשר במייל או דרך הטופס — ספרו לי מה אתם יוצרים ומתי אתם צריכים את זה.",
+      bar: "bg-orange",
+    },
+    {
+      title: "שיחת היכרות קצרה",
+      body: "שיחה קצרה כדי לסכם את המטרה, הקהל, הטון ולוח הזמנים.",
+      bar: "bg-pink-bright",
+    },
+    {
+      title: "עריכת וידאו",
+      body: "אני בונה את הסיפור — מבנה, קצב, סאונד וצבע — לטיוטה ראשונה שתוכלו להגיב עליה.",
+      bar: "bg-purple",
+    },
+    {
+      title: "סבבי תיקונים",
+      body: "מעגלי משוב ממוקדים עד שכל פריים מרוויח את מקומו.",
+      bar: "bg-green",
+    },
+    {
+      title: "מסירה סופית",
+      body: "קבצי מאסטר מיוצאים לכל פלטפורמה שבה אתם מפרסמים — מסופקים בזמן.",
+      bar: "bg-blue",
+    },
+  ],
+};
+
+const copy = {
+  en: { kicker: "[ Scroll to spread the deck ]", heading: "HOW WE'LL WORK" },
+  he: { kicker: "[ גללו כדי לפרוש את הקלפים ]", heading: "איך נעבוד" },
+};
 
 export default function Process() {
+  const { lang } = useLanguage();
+  const steps = stepsByLang[lang];
+  const t = copy[lang];
+
   return (
     <section id="process" className="bg-ink px-6 py-24 sm:px-10">
       <div className="mx-auto max-w-4xl">
         <p className="mb-4 text-sm uppercase tracking-widest text-cream/60">
-          [ Scroll to spread the deck ]
+          {t.kicker}
         </p>
         <h2 className="mb-16 font-display text-4xl leading-[0.95] sm:text-5xl md:text-6xl">
-          HOW WE&apos;LL WORK
+          {t.heading}
         </h2>
 
         <StackReveal className="grid grid-cols-1 gap-8">

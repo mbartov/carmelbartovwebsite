@@ -3,6 +3,22 @@
 import { useEffect, useRef, useState } from "react";
 import { loadYouTubeIframeApi, type YTPlayer } from "@/lib/youtubeIframeApi";
 import { useVideoPlayback } from "./VideoPlaybackContext";
+import { useLanguage } from "./LanguageContext";
+
+const copy = {
+  en: {
+    nowScreening: "Now screening",
+    pause: (title: string) => `Pause ${title}`,
+    play: (title: string) => `Play ${title}`,
+    liveFromEditBay: "Live from the edit bay",
+  },
+  he: {
+    nowScreening: "כעת מוקרן",
+    pause: (title: string) => `השהה ${title}`,
+    play: (title: string) => `נגן ${title}`,
+    liveFromEditBay: "בשידור חי מחדר העריכה",
+  },
+};
 
 const colorMap: Record<string, string> = {
   pink: "bg-pink-bright",
@@ -24,6 +40,8 @@ export default function VideoTicketCard({
   color,
 }: Props) {
   const { activeId, play, stop } = useVideoPlayback();
+  const { lang } = useLanguage();
+  const t = copy[lang];
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mountWrapperRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<YTPlayer | null>(null);
@@ -141,7 +159,7 @@ export default function VideoTicketCard({
       onMouseLeave={handleMouseLeave}
     >
       <div className="flex items-center justify-between text-[10px] font-medium uppercase tracking-widest sm:text-xs">
-        <span>Now screening</span>
+        <span>{t.nowScreening}</span>
         <span>Full HD</span>
       </div>
 
@@ -162,7 +180,7 @@ export default function VideoTicketCard({
           type="button"
           onClick={handlePlayClick}
           className="group absolute inset-0 flex items-center justify-center"
-          aria-label={isPlaying ? `Pause ${title}` : `Play ${title}`}
+          aria-label={isPlaying ? t.pause(title) : t.play(title)}
         >
           <span
             className={`absolute inset-0 bg-ink/30 transition-opacity ${
@@ -180,7 +198,7 @@ export default function VideoTicketCard({
       </div>
 
       <div className="mt-4 flex items-center justify-between border-t-2 border-dotted border-ink/50 pt-3 text-[10px] uppercase tracking-widest opacity-70">
-        <span>Live from the edit bay</span>
+        <span>{t.liveFromEditBay}</span>
         <span>@carmelbartov</span>
       </div>
     </div>
