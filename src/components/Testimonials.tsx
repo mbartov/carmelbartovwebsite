@@ -10,7 +10,7 @@ const quotesByLang = {
       quote:
         "Fast, precise, and genuinely creative. Carmel understood the story we needed before we did.",
       name: "AVIA ROZALIO",
-      role: "COLONEL, IDF SPOKESMAN",
+      role: "MAJOR, IDF SPOKESMAN",
       bg: "bg-pink-bright",
     },
     {
@@ -32,13 +32,13 @@ const quotesByLang = {
     {
       quote:
         "מהירה, מדויקת ויצירתית באמת. כרמל הבינה את הסיפור שהיינו צריכים עוד לפני שאנחנו הבנו.",
-      name: "AVIA ROZALIO",
-      role: 'אל"ם, דובר צה"ל',
+      name: "אביה רוזליו",
+      role: 'סרן, דובר צה"ל',
       bg: "bg-pink-bright",
     },
     {
       quote:
-        "בכל התרגילים והסרטים שיצרה עד עכשיו גילתה כישרון רב ויצירתיות רבה. כל צוות שיפיק ויצור סרט יזכה בה כחברת צוות משקיעה ותורמת רבות להצלחת הסרט.",
+        "כל צוות שיפיק ויצור סרט יזכה בה כחברת צוות משקיעה ותורמת רבות להצלחת הסרט.",
       name: "ירון רוטנברג",
       role: "מורה לקולנוע",
       bg: "bg-orange",
@@ -46,7 +46,7 @@ const quotesByLang = {
     {
       quote:
         "מעורבות הקהל שלנו הכפילה את עצמה מאז שכרמל התחילה לערוך את התוכן שלנו. המספרים לא משקרים.",
-      name: "DANIEL ROSEN",
+      name: "דניאל רוזן",
       role: "יוצר תוכן",
       bg: "bg-purple",
     },

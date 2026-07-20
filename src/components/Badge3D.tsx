@@ -2,7 +2,7 @@
 
 import * as THREE from "three";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { Canvas, extend, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, extend, useFrame } from "@react-three/fiber";
 import { Environment, Lightformer, Text, useTexture } from "@react-three/drei";
 import {
   BallCollider,
@@ -14,6 +14,7 @@ import {
   type RapierRigidBody,
 } from "@react-three/rapier";
 import { MeshLineGeometry, MeshLineMaterial } from "meshline";
+import { useLanguage, type Lang } from "./LanguageContext";
 
 extend({ MeshLineGeometry, MeshLineMaterial });
 
@@ -32,6 +33,17 @@ const SLOT_WIDTH = 0.42 * BADGE_SCALE;
 const SLOT_HEIGHT = 0.09 * BADGE_SCALE;
 const IMAGE_Y = 0.55 * BADGE_SCALE;
 const IMAGE_RADIUS = 0.32 * BADGE_SCALE;
+// Physics pivot sits above the card's top edge (not at the visual slot)
+const CARD_OFFSET = CARD_HEIGHT / 2 + 0.15 * BADGE_SCALE;
+/** Fills the whole slot opening so the pink page never shows through */
+const CLIP_WIDTH = SLOT_WIDTH * 0.95;
+const CLIP_HEIGHT = SLOT_HEIGHT * 0.95;
+const CLIP_DEPTH = CARD_DEPTH + 0.16 * BADGE_SCALE;
+/** Card-local strap from the physics attach point down through the slot */
+const STRAP_TOP = CARD_OFFSET;
+const STRAP_BOTTOM = SLOT_Y - CLIP_HEIGHT * 0.5;
+const STRAP_HEIGHT = STRAP_TOP - STRAP_BOTTOM;
+const STRAP_MID_Y = (STRAP_TOP + STRAP_BOTTOM) / 2;
 
 function roundedRectShape(
   width: number,
@@ -70,8 +82,11 @@ function useCardGeometry() {
   }, []);
 }
 
-function CardFace() {
+function CardFace({ lang }: { lang: Lang }) {
   const texture = useTexture("/images/carmel-headshot.jpg");
+  const role =
+    lang === "he" ? "עורכת וידאו ויוצרת תוכן" : "VIDEO EDITOR & CONTENT CREATOR";
+
   return (
     <group position={[0, 0, CARD_DEPTH / 2 + 0.002]}>
       <mesh position={[0, IMAGE_Y, 0]}>
@@ -93,15 +108,17 @@ function CardFace() {
       </Text>
       <Text
         position={[0, -0.62 * BADGE_SCALE, 0]}
-        fontSize={0.09 * BADGE_SCALE}
+        fontSize={lang === "he" ? 0.1 * BADGE_SCALE : 0.09 * BADGE_SCALE}
         lineHeight={1.2}
+        font={lang === "he" ? "/fonts/Rubik-Bold.ttf" : undefined}
         color={INK}
         anchorX="center"
         anchorY="middle"
         textAlign="center"
-        maxWidth={1.15 * BADGE_SCALE}
+        maxWidth={1.25 * BADGE_SCALE}
+        direction={lang === "he" ? "rtl" : "ltr"}
       >
-        VIDEO EDITOR & CONTENT CREATOR
+        {role}
       </Text>
       <Text
         position={[0, -0.85 * BADGE_SCALE, 0]}
@@ -117,10 +134,6 @@ function CardFace() {
 }
 
 const ROPE_SEGMENT = 0.5;
-// Physics pivot sits above the card's top edge (not at the visual slot) so the
-// rope's end point never overlaps the card mesh — that overlap was causing
-// z-fighting/flicker between the band and the card surface as it swung.
-const CARD_OFFSET = CARD_HEIGHT / 2 + 0.15 * BADGE_SCALE;
 const ANCHOR_X_DESKTOP = 2.2;
 const ANCHOR_X_MOBILE = 0;
 const ANCHOR_Y = 2.3;
@@ -140,7 +153,7 @@ function useIsMobile() {
   return isMobile;
 }
 
-function Lanyard({ anchorX }: { anchorX: number }) {
+function Lanyard({ anchorX, lang }: { anchorX: number; lang: Lang }) {
   const cardGeometry = useCardGeometry();
   const band = useRef<THREE.Mesh<MeshLineGeometry, MeshLineMaterial>>(null!);
   const fixed = useRef<RapierRigidBody>(null!);
@@ -153,14 +166,22 @@ function Lanyard({ anchorX }: { anchorX: number }) {
   const ang = new THREE.Vector3();
   const rot = new THREE.Vector3();
   const dir = new THREE.Vector3();
-  const slotWorld = new THREE.Vector3();
-  const slotQuat = new THREE.Quaternion();
+  // Hang further toward the outer edge on whichever side the badge sits
+  const side = anchorX === 0 ? 1 : Math.sign(anchorX);
 
-  const { width, height } = useThree((state) => state.size);
+  // Static resolution — updating MeshLine resolution every resize/frame
+  // causes the band tip to shimmer (known meshline/lanyard issue).
+  const resolution = useMemo(
+    () =>
+      new THREE.Vector2(
+        typeof window !== "undefined" ? window.innerWidth : 1280,
+        typeof window !== "undefined" ? window.innerHeight : 800
+      ),
+    []
+  );
   const [curve] = useState(
     () =>
       new THREE.CatmullRomCurve3([
-        new THREE.Vector3(),
         new THREE.Vector3(),
         new THREE.Vector3(),
         new THREE.Vector3(),
@@ -190,28 +211,12 @@ function Lanyard({ anchorX }: { anchorX: number }) {
       });
     }
     if (fixed.current) {
-      // The band is extended past its physics endpoint (j3) with an extra
-      // point drawn at the card's slot cutout, so it visually threads through
-      // the hole with no gap. It's appended after j3 rather than replacing it
-      // — replacing it let the spline interpolate directly between the
-      // independently-moving j2 (rope physics) and the card-tracked slot
-      // point, which pinched/tapered the ribbon short of the slot as the two
-      // drifted apart. It's also offset slightly in front of the card face
-      // (not z=0, the card's mid-depth) so the opaque front cap around the
-      // hole never occludes it — that occlusion was the flicker.
-      const cardPos = card.current.translation();
-      const cardRot = card.current.rotation();
-      slotQuat.set(cardRot.x, cardRot.y, cardRot.z, cardRot.w);
-      slotWorld
-        .set(0, SLOT_Y, CARD_DEPTH / 2 + 0.02 * BADGE_SCALE)
-        .applyQuaternion(slotQuat)
-        .add(vec.set(cardPos.x, cardPos.y, cardPos.z));
-
-      curve.points[0].copy(slotWorld);
-      curve.points[1].copy(j3.current.translation());
-      curve.points[2].copy(j2.current.translation());
-      curve.points[3].copy(j1.current.translation());
-      curve.points[4].copy(fixed.current.translation());
+      // Band stops at j3 (physics attach). A card-parented strap covers the
+      // slot — never run MeshLine into the hole (that tip-over-pink flicker).
+      curve.points[0].copy(j3.current.translation());
+      curve.points[1].copy(j2.current.translation());
+      curve.points[2].copy(j1.current.translation());
+      curve.points[3].copy(fixed.current.translation());
       band.current.geometry.setPoints(curve.getPoints(32));
 
       ang.copy(card.current.angvel());
@@ -230,7 +235,7 @@ function Lanyard({ anchorX }: { anchorX: number }) {
     <>
       <RigidBody ref={fixed} position={[anchorX, ANCHOR_Y, 0]} type="fixed" />
       <RigidBody
-        position={[anchorX + ROPE_SEGMENT * 0.5, ANCHOR_Y, 0]}
+        position={[anchorX + side * ROPE_SEGMENT * 0.5, ANCHOR_Y, 0]}
         ref={j1}
         linearDamping={2}
         angularDamping={2}
@@ -239,7 +244,7 @@ function Lanyard({ anchorX }: { anchorX: number }) {
         <BallCollider args={[0.06]} />
       </RigidBody>
       <RigidBody
-        position={[anchorX + ROPE_SEGMENT, ANCHOR_Y, 0]}
+        position={[anchorX + side * ROPE_SEGMENT, ANCHOR_Y, 0]}
         ref={j2}
         linearDamping={2}
         angularDamping={2}
@@ -248,7 +253,7 @@ function Lanyard({ anchorX }: { anchorX: number }) {
         <BallCollider args={[0.06]} />
       </RigidBody>
       <RigidBody
-        position={[anchorX + ROPE_SEGMENT * 1.5, ANCHOR_Y, 0]}
+        position={[anchorX + side * ROPE_SEGMENT * 1.5, ANCHOR_Y, 0]}
         ref={j3}
         linearDamping={2}
         angularDamping={2}
@@ -257,7 +262,11 @@ function Lanyard({ anchorX }: { anchorX: number }) {
         <BallCollider args={[0.06]} />
       </RigidBody>
       <RigidBody
-        position={[anchorX + ROPE_SEGMENT * 1.5, ANCHOR_Y - CARD_OFFSET, 0]}
+        position={[
+          anchorX + side * ROPE_SEGMENT * 1.5,
+          ANCHOR_Y - CARD_OFFSET,
+          0,
+        ]}
         ref={card}
         angularDamping={4}
         linearDamping={4}
@@ -311,19 +320,28 @@ function Lanyard({ anchorX }: { anchorX: number }) {
               side={THREE.DoubleSide}
             />
           </mesh>
+          {/* Card-locked strap: fills the slot and meets j3 so MeshLine never
+              has to draw into the hole over the pink backdrop */}
+          <mesh position={[0, STRAP_MID_Y, 0]}>
+            <boxGeometry args={[CLIP_WIDTH, STRAP_HEIGHT, CLIP_DEPTH]} />
+            <meshBasicMaterial color={PURPLE} />
+          </mesh>
           <Suspense fallback={null}>
-            <CardFace />
+            <CardFace lang={lang} />
           </Suspense>
         </group>
       </RigidBody>
 
-      <mesh ref={band}>
+      <mesh ref={band} renderOrder={2}>
         <meshLineGeometry />
         <meshLineMaterial
           color={PURPLE}
-          resolution={[width, height]}
+          resolution={resolution}
           lineWidth={0.9}
           repeat={[-3, 1]}
+          depthTest={false}
+          depthWrite={false}
+          transparent
         />
       </mesh>
     </>
@@ -332,7 +350,10 @@ function Lanyard({ anchorX }: { anchorX: number }) {
 
 export default function Badge3D() {
   const isMobile = useIsMobile();
-  const anchorX = isMobile ? ANCHOR_X_MOBILE : ANCHOR_X_DESKTOP;
+  const { lang } = useLanguage();
+  // Mirror to the left in Hebrew so the badge sits opposite the RTL hero copy
+  const side = lang === "he" ? -1 : 1;
+  const anchorX = (isMobile ? ANCHOR_X_MOBILE : ANCHOR_X_DESKTOP) * side;
 
   return (
     <div className="pointer-events-auto absolute inset-0 touch-pan-y sm:touch-none">
@@ -344,8 +365,8 @@ export default function Badge3D() {
         <pointLight position={[0, 0, 12]} intensity={5} decay={0} />
         <pointLight position={[anchorX, ANCHOR_Y - 1.5, 9]} intensity={3} decay={0} />
         <Suspense fallback={null}>
-          <Physics gravity={[0, -32, 0]} interpolate>
-            <Lanyard anchorX={anchorX} />
+          <Physics gravity={[0, -32, 0]} interpolate key={`${lang}-${anchorX}`}>
+            <Lanyard anchorX={anchorX} lang={lang} />
           </Physics>
         </Suspense>
         <Environment resolution={64}>
@@ -358,13 +379,13 @@ export default function Badge3D() {
           <Lightformer
             intensity={1.2}
             color={PURPLE}
-            position={[-4, 2, 3]}
+            position={[-4 * side, 2, 3]}
             scale={[4, 4, 1]}
           />
           <Lightformer
             intensity={1.5}
             color={CREAM}
-            position={[4, 1, 3]}
+            position={[4 * side, 1, 3]}
             scale={[4, 4, 1]}
           />
         </Environment>
