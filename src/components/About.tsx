@@ -2,16 +2,6 @@
 
 import { useLanguage } from "./LanguageContext";
 
-function MicIcon() {
-  return (
-    <svg viewBox="0 0 64 64" className="h-14 w-14" fill="none" stroke="currentColor" strokeWidth="3">
-      <rect x="24" y="6" width="16" height="30" rx="8" />
-      <path d="M16 28a16 16 0 0 0 32 0" />
-      <path d="M32 44v10M22 54h20" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 const instruments: { label: string; bg: string; icon: React.ReactNode }[] = [
   {
     label: "MacBook",
@@ -79,17 +69,7 @@ const instruments: { label: string; bg: string; icon: React.ReactNode }[] = [
 
 const copy = {
   en: {
-    ticketBody:
-      "I'm Carmel, your backstage pass to unforgettable video experiences.",
-    ticketTitle: (
-      <>
-        CARMEL BARTOV &mdash;
-        <br />
-        BEHIND THE SCENES
-      </>
-    ),
-    admission: "General admission",
-    bio: "I'm Carmel Bartov, a video editor with several years of experience in content creation and video editing. During my service in the IDF Spokesperson's Unit, I edited digital content while collaborating with senior officers — a fast-paced environment that demanded precision, creativity, and the ability to meet tight deadlines. I believe every video should tell a story, capture the viewer's attention, and leave a lasting impression.",
+    bio: "I'm Carmel Bartov, a video editor with years of experience in content creation and video editing. During my service in the IDF Spokesperson's Unit, I edited digital content while collaborating with senior officers in a fast-paced environment that demanded precision, creativity, and the ability to meet daily releases and tight deadlines. I believe every video should tell a story, capture the viewer's attention, and leave a lasting impression.",
     currentlyEditing: (
       <>
         CURRENTLY EDITING
@@ -100,23 +80,8 @@ const copy = {
     hoverHint: "[ Hover the icons — they like to dance ]",
   },
   he: {
-    ticketBody: "אני כרמל, כרטיס ה-VIP שלך לחוויות וידאו בלתי נשכחות.",
-    ticketTitle: (
-      <>
-        CARMEL BARTOV &mdash;
-        <br />
-        מאחורי הקלעים
-      </>
-    ),
-    admission: "כניסה כללית",
-    bio: 'שלום,  אני כרמל ברטוב, עורכת וידאו עם ניסיון של מספר שנים ביצירת תוכן ועריכת וידאו. במהלך שירותי ביחידת דובר צה"ל ערכתי תוכן דיגיטלי תוך שיתוף פעולה עם קצינים בכירים — סביבה קצבית שדרשה דיוק, יצירתיות ויכולת לעמוד בלוחות זמנים צפופים. אני מאמינה שכל סרטון צריך לספר סיפור, לתפוס את תשומת הלב של הצופה ולהשאיר רושם עמוק.',
-    currentlyEditing: (
-      <>
-        כרגע עורכת
-        <br />
-        עבור יוצרים ומותגים
-      </>
-    ),
+    bio: "שלום, אני כרמל ברטוב, עורכת וידאו עם ניסיון של מספר שנים ביצירת תוכן ועריכת וידאו. במהלך שירותי ביחידת דובר צה”ל ערכתי תוכן דיגיטלי וסרטונים פנימיים בשיתוף פעולה עם קצינים בכירים, בסביבה דינמית שדרשה דיוק, יצירתיות ועמידה בלוחות זמנים. עבורי, עריכה היא הרבה יותר מחיבור של שוטים- היא הדרך לספר סיפור, להעביר רגש ולגרום לצופים להישאר עד הפריים האחרון.",
+    currentlyEditing: <>עורכת תוכן ליוצרים, עסקים ומותגים</>,
     hoverHint: "[ רחפו מעל האייקונים — הם אוהבים לרקוד ]",
   },
 };
@@ -127,26 +92,6 @@ export default function About() {
   return (
     <section id="about" className="bg-ink px-6 py-24 sm:px-10">
       <div className="mx-auto max-w-5xl">
-        {/* ticket illustration */}
-        <div
-          className="relative mx-auto mb-16 flex w-full max-w-2xl -rotate-2 items-center gap-4 border-[3px] border-ink bg-pink-bright p-6 text-ink sm:p-8"
-          style={{
-            clipPath:
-              "polygon(0 0, 82% 0, 82% 8%, 86% 0, 100% 0, 100% 100%, 18% 100%, 18% 92%, 14% 100%, 0 100%)",
-          }}
-        >
-          <div className="flex-1">
-            <p className="max-w-xs text-sm sm:text-base">{t.ticketBody}</p>
-            <p className="mt-6 font-display text-2xl leading-none sm:text-3xl">
-              {t.ticketTitle}
-            </p>
-          </div>
-          <MicIcon />
-          <p className="hidden -rotate-90 whitespace-nowrap text-xs uppercase tracking-[0.3em] sm:block">
-            {t.admission}
-          </p>
-        </div>
-
         <p className="mx-auto max-w-2xl text-center text-lg leading-relaxed text-cream/90 sm:text-xl">
           {t.bio}
         </p>

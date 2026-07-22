@@ -29,21 +29,35 @@ const CARD_HEIGHT = 2.25 * BADGE_SCALE;
 const CARD_DEPTH = 0.02 * BADGE_SCALE;
 const CARD_RADIUS = 0.12 * BADGE_SCALE;
 const SLOT_Y = 0.95 * BADGE_SCALE;
-const SLOT_WIDTH = 0.42 * BADGE_SCALE;
-const SLOT_HEIGHT = 0.09 * BADGE_SCALE;
+/** Wide enough that the oval stays visible around a thinner band */
+const SLOT_WIDTH = 0.55 * BADGE_SCALE;
+const SLOT_HEIGHT = 0.11 * BADGE_SCALE;
 const IMAGE_Y = 0.55 * BADGE_SCALE;
 const IMAGE_RADIUS = 0.32 * BADGE_SCALE;
-// Physics pivot sits above the card's top edge (not at the visual slot)
-const CARD_OFFSET = CARD_HEIGHT / 2 + 0.15 * BADGE_SCALE;
-/** Fills the whole slot opening so the pink page never shows through */
-const CLIP_WIDTH = SLOT_WIDTH * 0.95;
-const CLIP_HEIGHT = SLOT_HEIGHT * 0.95;
-const CLIP_DEPTH = CARD_DEPTH + 0.16 * BADGE_SCALE;
-/** Card-local strap from the physics attach point down through the slot */
-const STRAP_TOP = CARD_OFFSET;
-const STRAP_BOTTOM = SLOT_Y - CLIP_HEIGHT * 0.5;
-const STRAP_HEIGHT = STRAP_TOP - STRAP_BOTTOM;
-const STRAP_MID_Y = (STRAP_TOP + STRAP_BOTTOM) / 2;
+/** Attach above the card so the rope meets the slot cleanly */
+const CARD_OFFSET = CARD_HEIGHT / 2 + 0.12 * BADGE_SCALE;
+
+const BAND_SLOT_RATIO = 0.7;
+
+/** Band = 70% of slot opening (scaled from the original 0.9 @ 0.42 slot) */
+const REF_SLOT_WIDTH = 0.42 * BADGE_SCALE;
+const BAND_LINE_WIDTH =
+  0.9 * BAND_SLOT_RATIO * (SLOT_WIDTH / REF_SLOT_WIDTH);
+
+const ROPE_SEGMENT = 0.5;
+const ANCHOR_X_DESKTOP = 2.2;
+const ANCHOR_X_MOBILE = 0;
+const ANCHOR_Y = 2.3;
+
+function cardCenter(anchorX: number, side: number) {
+  return {
+    x: anchorX + side * ROPE_SEGMENT * 1.5,
+    y: ANCHOR_Y - CARD_OFFSET,
+  };
+}
+
+const WIND_IMPULSE_SCALE = 0.9;
+const WIND_STILL_THRESHOLD = 0.4;
 
 function roundedRectShape(
   width: number,
@@ -85,7 +99,7 @@ function useCardGeometry() {
 function CardFace({ lang }: { lang: Lang }) {
   const texture = useTexture("/images/carmel-headshot.jpg");
   const role =
-    lang === "he" ? "עורכת וידאו ויוצרת תוכן" : "VIDEO EDITOR & CONTENT CREATOR";
+    lang === "he" ? "עורכת וידאו ומפיקת תוכן" : "VIDEO EDITOR & CONTENT PRODUCER";
 
   return (
     <group position={[0, 0, CARD_DEPTH / 2 + 0.002]}>
@@ -133,14 +147,6 @@ function CardFace({ lang }: { lang: Lang }) {
   );
 }
 
-const ROPE_SEGMENT = 0.5;
-const ANCHOR_X_DESKTOP = 2.2;
-const ANCHOR_X_MOBILE = 0;
-const ANCHOR_Y = 2.3;
-
-const WIND_IMPULSE_SCALE = 0.9;
-const WIND_STILL_THRESHOLD = 0.4;
-
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -162,15 +168,15 @@ function Lanyard({ anchorX, lang }: { anchorX: number; lang: Lang }) {
   const j3 = useRef<RapierRigidBody>(null!);
   const card = useRef<RapierRigidBody>(null!);
 
-  const vec = new THREE.Vector3();
-  const ang = new THREE.Vector3();
-  const rot = new THREE.Vector3();
-  const dir = new THREE.Vector3();
-  // Hang further toward the outer edge on whichever side the badge sits
+  const vec = useMemo(() => new THREE.Vector3(), []);
+  const ang = useMemo(() => new THREE.Vector3(), []);
+  const rot = useMemo(() => new THREE.Vector3(), []);
+  const dir = useMemo(() => new THREE.Vector3(), []);
+  const slotWorld = useMemo(() => new THREE.Vector3(), []);
+  const slotQuat = useMemo(() => new THREE.Quaternion(), []);
+
   const side = anchorX === 0 ? 1 : Math.sign(anchorX);
 
-  // Static resolution — updating MeshLine resolution every resize/frame
-  // causes the band tip to shimmer (known meshline/lanyard issue).
   const resolution = useMemo(
     () =>
       new THREE.Vector2(
@@ -179,6 +185,7 @@ function Lanyard({ anchorX, lang }: { anchorX: number; lang: Lang }) {
       ),
     []
   );
+
   const [curve] = useState(
     () =>
       new THREE.CatmullRomCurve3([
@@ -186,8 +193,10 @@ function Lanyard({ anchorX, lang }: { anchorX: number; lang: Lang }) {
         new THREE.Vector3(),
         new THREE.Vector3(),
         new THREE.Vector3(),
+        new THREE.Vector3(),
       ])
   );
+
   const [dragged, drag] = useState<false | THREE.Vector3>(false);
   const lastPointerX = useRef<number | null>(null);
 
@@ -198,6 +207,35 @@ function Lanyard({ anchorX, lang }: { anchorX: number; lang: Lang }) {
     [0, 0, 0],
     [0, CARD_OFFSET, 0],
   ]);
+
+  // pointerup often never reaches the canvas when the mouse is released
+  // outside the browser window/tab — end the drag from the document instead.
+  useEffect(() => {
+    if (!dragged) return;
+
+    const endDrag = () => {
+      drag(false);
+      lastPointerX.current = null;
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState !== "visible") endDrag();
+    };
+
+    window.addEventListener("pointerup", endDrag);
+    window.addEventListener("pointercancel", endDrag);
+    window.addEventListener("blur", endDrag);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    document.documentElement.addEventListener("mouseleave", endDrag);
+
+    return () => {
+      window.removeEventListener("pointerup", endDrag);
+      window.removeEventListener("pointercancel", endDrag);
+      window.removeEventListener("blur", endDrag);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      document.documentElement.removeEventListener("mouseleave", endDrag);
+    };
+  }, [dragged]);
 
   useFrame((state) => {
     if (dragged) {
@@ -210,24 +248,32 @@ function Lanyard({ anchorX, lang }: { anchorX: number; lang: Lang }) {
         z: vec.z - dragged.z,
       });
     }
-    if (fixed.current) {
-      // Band stops at j3 (physics attach). A card-parented strap covers the
-      // slot — never run MeshLine into the hole (that tip-over-pink flicker).
-      curve.points[0].copy(j3.current.translation());
-      curve.points[1].copy(j2.current.translation());
-      curve.points[2].copy(j1.current.translation());
-      curve.points[3].copy(fixed.current.translation());
-      band.current.geometry.setPoints(curve.getPoints(32));
 
-      ang.copy(card.current.angvel());
-      rot.copy(card.current.rotation());
-      const angSq = ang.x * ang.x + ang.y * ang.y + ang.z * ang.z;
-      if (angSq > 0.0004 || Math.abs(rot.y) > 0.01) {
-        card.current.setAngvel(
-          { x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z },
-          true
-        );
-      }
+    if (!fixed.current || !card.current || !band.current) return;
+
+    const cardPos = card.current.translation();
+    const cardRot = card.current.rotation();
+    slotQuat.set(cardRot.x, cardRot.y, cardRot.z, cardRot.w);
+    slotWorld
+      .set(0, SLOT_Y, CARD_DEPTH / 2 + 0.02 * BADGE_SCALE)
+      .applyQuaternion(slotQuat)
+      .add(vec.set(cardPos.x, cardPos.y, cardPos.z));
+
+    curve.points[0].copy(slotWorld);
+    curve.points[1].copy(j3.current.translation());
+    curve.points[2].copy(j2.current.translation());
+    curve.points[3].copy(j1.current.translation());
+    curve.points[4].copy(fixed.current.translation());
+    band.current.geometry.setPoints(curve.getPoints(32));
+
+    ang.copy(card.current.angvel());
+    rot.copy(card.current.rotation());
+    const angSq = ang.x * ang.x + ang.y * ang.y + ang.z * ang.z;
+    if (angSq > 0.0004 || Math.abs(rot.y) > 0.01) {
+      card.current.setAngvel(
+        { x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z },
+        true
+      );
     }
   });
 
@@ -278,11 +324,19 @@ function Lanyard({ anchorX, lang }: { anchorX: number; lang: Lang }) {
         />
         <group
           onPointerUp={(e) => {
-            (e.target as HTMLElement).releasePointerCapture?.(e.pointerId);
+            (e.target as Element | null)?.releasePointerCapture?.(e.pointerId);
+            drag(false);
+          }}
+          onPointerCancel={(e) => {
+            (e.target as Element | null)?.releasePointerCapture?.(e.pointerId);
+            drag(false);
+          }}
+          onLostPointerCapture={() => {
             drag(false);
           }}
           onPointerDown={(e) => {
-            (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+            e.stopPropagation();
+            (e.target as Element | null)?.setPointerCapture?.(e.pointerId);
             drag(
               new THREE.Vector3()
                 .copy(e.point)
@@ -320,28 +374,21 @@ function Lanyard({ anchorX, lang }: { anchorX: number; lang: Lang }) {
               side={THREE.DoubleSide}
             />
           </mesh>
-          {/* Card-locked strap: fills the slot and meets j3 so MeshLine never
-              has to draw into the hole over the pink backdrop */}
-          <mesh position={[0, STRAP_MID_Y, 0]}>
-            <boxGeometry args={[CLIP_WIDTH, STRAP_HEIGHT, CLIP_DEPTH]} />
-            <meshBasicMaterial color={PURPLE} />
-          </mesh>
           <Suspense fallback={null}>
             <CardFace lang={lang} />
           </Suspense>
+          {/* Front fill — moves with the card so name/role stay lit */}
+          <pointLight position={[0, 0, 2.2]} intensity={3} decay={0} />
         </group>
       </RigidBody>
 
-      <mesh ref={band} renderOrder={2}>
+      <mesh ref={band}>
         <meshLineGeometry />
         <meshLineMaterial
           color={PURPLE}
           resolution={resolution}
-          lineWidth={0.9}
+          lineWidth={BAND_LINE_WIDTH}
           repeat={[-3, 1]}
-          depthTest={false}
-          depthWrite={false}
-          transparent
         />
       </mesh>
     </>
@@ -351,19 +398,24 @@ function Lanyard({ anchorX, lang }: { anchorX: number; lang: Lang }) {
 export default function Badge3D() {
   const isMobile = useIsMobile();
   const { lang } = useLanguage();
-  // Mirror to the left in Hebrew so the badge sits opposite the RTL hero copy
   const side = lang === "he" ? -1 : 1;
   const anchorX = (isMobile ? ANCHOR_X_MOBILE : ANCHOR_X_DESKTOP) * side;
+  const center = cardCenter(anchorX, side);
 
   return (
     <div className="pointer-events-auto absolute inset-0 touch-pan-y sm:touch-none">
       <Canvas camera={{ position: [0, 0, 13], fov: 25 }}>
-        <ambientLight intensity={0.9} />
-        <directionalLight position={[5, 6, 5]} intensity={1} />
-        {/* headlight: travels with the camera so whichever face is toward the
-            viewer stays lit, even as the badge swings on the lanyard */}
-        <pointLight position={[0, 0, 12]} intensity={5} decay={0} />
-        <pointLight position={[anchorX, ANCHOR_Y - 1.5, 9]} intensity={3} decay={0} />
+        <ambientLight intensity={0.75} />
+        <directionalLight
+          position={[center.x, center.y, 11]}
+          intensity={1.2}
+        />
+        <pointLight position={[0, 0, 12]} intensity={3} decay={0} />
+        <pointLight
+          position={[center.x, center.y, 9]}
+          intensity={4}
+          decay={0}
+        />
         <Suspense fallback={null}>
           <Physics gravity={[0, -32, 0]} interpolate key={`${lang}-${anchorX}`}>
             <Lanyard anchorX={anchorX} lang={lang} />
@@ -373,20 +425,20 @@ export default function Badge3D() {
           <Lightformer
             intensity={2}
             color="white"
-            position={[0, 4, -3]}
-            scale={[6, 6, 1]}
+            position={[center.x, center.y, 5]}
+            scale={[3.5, 4.5, 1]}
           />
           <Lightformer
-            intensity={1.2}
+            intensity={0.8}
             color={PURPLE}
             position={[-4 * side, 2, 3]}
             scale={[4, 4, 1]}
           />
           <Lightformer
-            intensity={1.5}
+            intensity={1.2}
             color={CREAM}
-            position={[4 * side, 1, 3]}
-            scale={[4, 4, 1]}
+            position={[center.x, center.y, 3]}
+            scale={[3, 4, 1]}
           />
         </Environment>
       </Canvas>

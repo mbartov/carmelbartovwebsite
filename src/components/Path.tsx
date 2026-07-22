@@ -19,11 +19,16 @@ const milestonesByLang = {
     },
     {
       range: "2026 – NOW",
-      title: "VIDEO EDITOR & CONTENT CREATOR",
+      title: "VIDEO EDITOR & CONTENT DIRECTOR",
       meta: "INDEPENDENT",
       color: "bg-purple",
     },
-  ],
+    {
+      range: "2026 – NOW",
+      title: "FILM STUDENT",
+      meta: "TEL AVIV UNIVERSITY",
+      color: "bg-purple",
+    }],
   he: [
     {
       range: "2020 – 2024",
@@ -39,7 +44,7 @@ const milestonesByLang = {
     },
     {
       range: "2026 – היום",
-      title: "עורכת וידאו ויוצרת תוכן",
+      title: "עורכת וידאו ומפיקת תוכן",
       meta: "עצמאית",
       color: "bg-purple",
     },

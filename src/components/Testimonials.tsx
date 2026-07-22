@@ -55,7 +55,7 @@ const quotesByLang = {
 
 const copy = {
   en: { kicker: "[ Kind words ]", heading: "WHAT CLIENTS SAY", drag: "[ Drag → ]" },
-  he: { kicker: "[ מילים טובות ]", heading: "מה הלקוחות אומרים", drag: "[ גררו ← ]" },
+  he: { kicker: "[ מילים טובות ]", heading: "מה הלקוחות אומרים", drag: "[ גררו → ]" },
 };
 
 export default function Testimonials() {
@@ -65,6 +65,7 @@ export default function Testimonials() {
   const { lang } = useLanguage();
   const quotes = quotesByLang[lang];
   const t = copy[lang];
+  const isRtl = lang === "he";
 
   useLayoutEffect(() => {
     const measure = () => {
@@ -76,7 +77,7 @@ export default function Testimonials() {
     measure();
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
-  }, []);
+  }, [lang, quotes]);
 
   return (
     <section
@@ -98,27 +99,34 @@ export default function Testimonials() {
           </p>
         </div>
 
-        <div ref={containerRef} className="cursor-grab active:cursor-grabbing">
+        {/* Force LTR drag axis so RTL page direction doesn't invert constraints */}
+        <div
+          ref={containerRef}
+          className="cursor-grab active:cursor-grabbing"
+          dir="ltr"
+        >
           <motion.div
+            key={lang}
             ref={trackRef}
             className="flex gap-8"
             drag="x"
             dragConstraints={{ left: -constraint, right: 0 }}
             dragElastic={0.08}
           >
-            {quotes.map((t) => (
+            {quotes.map((item) => (
               <div
-                key={t.name}
-                className={`w-[20rem] shrink-0 rounded-3xl p-8 text-ink sm:w-[24rem] sm:p-10 ${t.bg}`}
+                key={item.name}
+                className={`w-[20rem] shrink-0 rounded-3xl p-8 text-ink sm:w-[24rem] sm:p-10 ${item.bg}`}
+                dir={isRtl ? "rtl" : "ltr"}
               >
                 <p className="font-display text-2xl leading-snug sm:text-3xl">
-                  &ldquo;{t.quote}&rdquo;
+                  &ldquo;{item.quote}&rdquo;
                 </p>
                 <p className="mt-8 text-sm font-semibold uppercase tracking-widest">
-                  {t.name}
+                  {item.name}
                 </p>
                 <p className="text-xs uppercase tracking-widest opacity-70">
-                  {t.role}
+                  {item.role}
                 </p>
               </div>
             ))}

@@ -1,6 +1,12 @@
 "use client";
 
+import { CONTACT_EMAIL } from "@/lib/contact";
 import { useLanguage } from "./LanguageContext";
+import {
+  WireframeEmail,
+  WireframeInstagram,
+  WireframeYouTube,
+} from "./SocialIcons";
 
 const copy = {
   en: {
@@ -22,7 +28,7 @@ const copy = {
         וניצור ביחד
       </>
     ),
-    body: "אשמח לשמוע על החזון של הפרויקט שלכם ואיך אני יכולה לעזור לו לזרוח!",
+    body: "ש לכם פרויקט? אשמח לשמוע עליו ולחשוב יחד איך להפוך אותו לסרטון מדויק ומרשים",
     cta: "צרו איתי קשר",
   },
 };
@@ -41,14 +47,14 @@ export default function Contact() {
             <p className="mt-6 max-w-sm text-cream/80">{t.body}</p>
 
             <a
-              href="mailto:hello@carmel.video"
+              href={`mailto:${CONTACT_EMAIL}`}
               className="mt-8 inline-block rounded-full bg-ink px-6 py-3 font-medium text-cream transition-transform hover:-translate-y-0.5"
             >
               {t.cta}
             </a>
 
             <p className="mt-14 font-display text-3xl sm:text-4xl">
-              hello@carmel.video
+              {CONTACT_EMAIL}
             </p>
           </div>
 
@@ -57,26 +63,26 @@ export default function Contact() {
               href="https://instagram.com/carmelbartov"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex h-14 w-14 items-center justify-center rounded-full bg-cream font-medium text-green"
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-cream text-green"
               aria-label="Instagram"
             >
-              IG
+              <WireframeInstagram className="h-6 w-6" />
             </a>
             <a
               href="https://youtube.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex h-14 w-14 items-center justify-center rounded-full bg-cream font-display text-lg text-green"
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-cream text-green"
               aria-label="YouTube"
             >
-              YT
+              <WireframeYouTube className="h-6 w-6" />
             </a>
             <a
-              href="mailto:hello@carmel.video"
-              className="flex h-14 w-14 items-center justify-center rounded-full bg-cream text-xl text-green"
+              href={`mailto:${CONTACT_EMAIL}`}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-cream text-green"
               aria-label={lang === "en" ? "Email" : "אימייל"}
             >
-              &#9993;
+              <WireframeEmail className="h-6 w-6" />
             </a>
           </div>
         </div>

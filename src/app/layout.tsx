@@ -3,6 +3,7 @@ import { Anton, Inter, Rubik } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/components/LanguageContext";
 import LanguageToggle from "@/components/LanguageToggle";
+import AvailableFloatingButton from "@/components/AvailableFloatingButton";
 
 const anton = Anton({
   variable: "--font-anton",
@@ -23,9 +24,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Carmel Bartov — Video Editor & Content Creator",
+  title: "Carmel Bartov — Video Editor & Content Producer",
   description:
-    "Carmel Bartov is a video editor and content creator. Your story's backstage pass.",
+    "Carmel Bartov is a video editor and content producer. Your story's backstage pass.",
 };
 
 export default function RootLayout({
@@ -51,6 +52,7 @@ export default function RootLayout({
         <LanguageProvider>
           <LanguageToggle />
           {children}
+          <AvailableFloatingButton />
         </LanguageProvider>
       </body>
     </html>

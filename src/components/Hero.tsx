@@ -1,7 +1,9 @@
 "use client";
 
 import Badge3D from "./Badge3DClient";
+import { AVAILABLE_BUTTON_ANCHOR_ID } from "./AvailableFloatingButton";
 import { useLanguage } from "./LanguageContext";
+import { WireframeInstagram, WireframeYouTube } from "./SocialIcons";
 
 const nav = {
   en: [
@@ -20,13 +22,6 @@ const nav = {
 
 const copy = {
   en: {
-    available: (
-      <>
-        AVAILABLE
-        <br />
-        WORLDWIDE
-      </>
-    ),
     heading: (
       <>
         YOUR STORY&apos;S
@@ -35,26 +30,14 @@ const copy = {
       </>
     ),
     sub: "Let's find your story's rhythm and get your footage ready to rock the stage!",
-    availableForProjects: "Available for new projects",
   },
   he: {
-    available: (
-      <>
-        זמינה
-        <br />
-        בכל העולם
-      </>
-    ),
     heading: (
       <>
-        כרטיס ה־
-        <bdi>VIP</bdi>
-        <br />
-        לסיפור שלך
+       הפריים הראשון של הסיפור שלכם
       </>
     ),
-    sub: "בואו נמצא את הקצב של הסיפור שלכם ונכין את החומרים שלכם לעלות לבמה!",
-    availableForProjects: "זמינה לפרויקטים חדשים",
+    sub: "כל סרטון מתחיל בסיפור טוב ומסתיים בעריכה מדויקת. בואו נהפוך את החומרים שלכם לסרטון שאי אפשר להתעלם ממנו!",
   },
 };
 
@@ -63,19 +46,6 @@ export default function Hero() {
   const t = copy[lang];
   return (
     <section className="relative min-h-[900px] overflow-hidden bg-pink px-6 pb-24 pt-10 text-ink sm:px-10">
-      {/* star badge */}
-      <div className="absolute left-6 top-0 z-20 hidden -translate-y-1/2 -rotate-6 sm:block rtl:left-auto rtl:right-6 rtl:rotate-6">
-        <div
-          className="flex h-28 w-28 items-center justify-center border-2 border-ink bg-yellow text-center font-display text-sm leading-tight"
-          style={{
-            clipPath:
-              "polygon(50% 0%, 61% 15%, 78% 6%, 80% 25%, 98% 28%, 90% 45%, 100% 60%, 82% 68%, 85% 87%, 66% 82%, 55% 100%, 44% 84%, 25% 95%, 21% 76%, 3% 72%, 13% 55%, 0% 40%, 18% 32%, 15% 13%, 34% 18%)",
-          }}
-        >
-          {t.available}
-        </div>
-      </div>
-
       {/* nav pill */}
       <nav className="relative z-20 mx-auto mb-14 hidden w-fit items-center gap-1 rounded-full bg-ink p-1.5 md:flex">
         {nav[lang].map(([label, href]) => (
@@ -98,16 +68,16 @@ export default function Hero() {
           className="flex h-12 w-12 items-center justify-center rounded-full bg-ink text-cream transition-transform hover:-translate-y-0.5"
           aria-label="Instagram"
         >
-          IG
+          <WireframeInstagram className="h-6 w-6" />
         </a>
         <a
           href="https://youtube.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex h-12 w-12 items-center justify-center rounded-full bg-ink font-display text-lg text-cream transition-transform hover:-translate-y-0.5"
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-ink text-cream transition-transform hover:-translate-y-0.5"
           aria-label="YouTube"
         >
-          YT
+          <WireframeYouTube className="h-6 w-6" />
         </a>
       </div>
 
@@ -122,11 +92,11 @@ export default function Hero() {
           <p className="mt-6 max-w-md text-lg leading-relaxed text-ink/80">
             {t.sub}
           </p>
-
-          <div className="pointer-events-auto mt-8 flex w-fit items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-medium text-cream">
-            <span className="h-2.5 w-2.5 rounded-full bg-green" />
-            {t.availableForProjects}
-          </div>
+          <div
+            id={AVAILABLE_BUTTON_ANCHOR_ID}
+            className="pointer-events-none mt-8 w-full max-w-md"
+            aria-hidden
+          />
         </div>
       </div>
     </section>

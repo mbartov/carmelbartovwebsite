@@ -69,6 +69,37 @@ body {
   animation: marquee 22s linear infinite;
 }
 
+@keyframes bulb-halo {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.35);
+  }
+}
+
+@keyframes bulb-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 2px #9dff57) drop-shadow(0 0 6px rgba(157, 255, 87, 0.7));
+  }
+  50% {
+    filter: drop-shadow(0 0 4px #c8ff8a) drop-shadow(0 0 12px rgba(157, 255, 87, 1))
+      drop-shadow(0 0 20px rgba(157, 255, 87, 0.55));
+  }
+}
+
+.animate-bulb-halo {
+  animation: bulb-halo 2s ease-in-out infinite;
+}
+
+.animate-bulb-glow {
+  animation: bulb-glow 2s ease-in-out infinite;
+}
+
 .ticket-scallop {
   border-radius: 20px;
 }

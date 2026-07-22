@@ -1,6 +1,7 @@
 "use client";
 
 import { serviceTagsByLang } from "@/lib/services";
+import { CONTACT_EMAIL } from "@/lib/contact";
 import StackReveal from "./StackReveal";
 import { useLanguage } from "./LanguageContext";
 
@@ -14,7 +15,7 @@ const bodiesByLang = {
   he: [
     "עריכות קצרות שעוצרות גלילה, בנויות לאינסטגרם, טיקטוק ויוטיוב שורטס.",
     "ראיונות, סרטים תיעודיים וסרטי מותג, ערוכים לקצב ובהירות.",
-    "עריכת עלילת סרט קצר, צילום, עריכה וקליפים לרשתות.",
+    "ליווי סרטים קצרים משלב ההפקה ועד העריכה הסופית, כולל תוכן לרשתות החברתיות.",
     "אודיו נקי, דיאלוג ממוקסס וסאונד שתומך בסיפור.",
   ],
 };
@@ -96,7 +97,7 @@ export default function Services() {
                 {t.ctaHeading}
               </span>
               <a
-                href="mailto:hello@carmel.video"
+                href={`mailto:${CONTACT_EMAIL}`}
                 className="rounded-full bg-cream px-10 py-4 text-lg font-medium text-ink"
               >
                 {t.cta}
