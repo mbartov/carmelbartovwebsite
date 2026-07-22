@@ -100,6 +100,50 @@ body {
   animation: bulb-glow 2s ease-in-out infinite;
 }
 
+@keyframes available-glow-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.available-glow-frame {
+  position: absolute;
+  inset: -8px;
+  border-radius: 9999px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.available-glow-frame::before {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 70deg,
+    rgba(157, 255, 87, 0.15) 100deg,
+    #9dff57 140deg,
+    #c8ff8a 160deg,
+    #9dff57 180deg,
+    rgba(157, 255, 87, 0.15) 220deg,
+    transparent 250deg,
+    transparent 360deg
+  );
+  filter: blur(1.5px);
+  animation: available-glow-spin 2.4s linear infinite;
+}
+
+.available-glow-frame::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 9999px;
+  background: var(--color-ink);
+  box-shadow: 0 0 14px rgba(157, 255, 87, 0.4);
+}
+
 .ticket-scallop {
   border-radius: 20px;
 }

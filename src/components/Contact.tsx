@@ -53,7 +53,7 @@ export default function Contact() {
               {t.cta}
             </a>
 
-            <p className="mt-14 font-display text-3xl sm:text-4xl">
+            <p className="mt-14 break-all font-display text-xl leading-tight sm:text-3xl md:text-4xl">
               {CONTACT_EMAIL}
             </p>
           </div>

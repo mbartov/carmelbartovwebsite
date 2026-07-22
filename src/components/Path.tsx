@@ -28,7 +28,8 @@ const milestonesByLang = {
       title: "FILM STUDENT",
       meta: "TEL AVIV UNIVERSITY",
       color: "bg-purple",
-    }],
+    },
+  ],
   he: [
     {
       range: "2020 – 2024",
@@ -46,6 +47,12 @@ const milestonesByLang = {
       range: "2026 – היום",
       title: "עורכת וידאו ומפיקת תוכן",
       meta: "עצמאית",
+      color: "bg-purple",
+    },
+    {
+      range: "2026 – היום",
+      title: "סטודנטית לקולנוע",
+      meta: "אוניברסיטת תל אביב",
       color: "bg-purple",
     },
   ],
@@ -75,7 +82,7 @@ export default function Path() {
           <div className="flex flex-col gap-16">
             {milestones.map((m, i) => (
               <motion.div
-                key={m.title}
+                key={`${m.range}-${m.title}`}
                 className="relative"
                 initial={{ opacity: 0, y: 32 }}
                 whileInView={{ opacity: 1, y: 0 }}

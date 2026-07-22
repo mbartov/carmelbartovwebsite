@@ -1,7 +1,5 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import { useLanguage } from "./LanguageContext";
 
 const quotesByLang = {
@@ -54,30 +52,23 @@ const quotesByLang = {
 };
 
 const copy = {
-  en: { kicker: "[ Kind words ]", heading: "WHAT CLIENTS SAY", drag: "[ Drag → ]" },
-  he: { kicker: "[ מילים טובות ]", heading: "מה הלקוחות אומרים", drag: "[ גררו → ]" },
+  en: {
+    kicker: "[ Kind words ]",
+    heading: "WHAT CLIENTS SAY",
+    drag: "[ Swipe → ]",
+  },
+  he: {
+    kicker: "[ מילים טובות ]",
+    heading: "מה הלקוחות אומרים",
+    drag: "[ החליקו → ]",
+  },
 };
 
 export default function Testimonials() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [constraint, setConstraint] = useState(0);
   const { lang } = useLanguage();
   const quotes = quotesByLang[lang];
   const t = copy[lang];
   const isRtl = lang === "he";
-
-  useLayoutEffect(() => {
-    const measure = () => {
-      if (!containerRef.current || !trackRef.current) return;
-      const diff =
-        trackRef.current.scrollWidth - containerRef.current.offsetWidth;
-      setConstraint(Math.max(diff, 0));
-    };
-    measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, [lang, quotes]);
 
   return (
     <section
@@ -99,24 +90,19 @@ export default function Testimonials() {
           </p>
         </div>
 
-        {/* Force LTR drag axis so RTL page direction doesn't invert constraints */}
+        {/*
+          Native overflow scroll (dir=ltr) — framer dragConstraints invert under
+          page RTL and trap Hebrew mobile users on the wrong axis.
+        */}
         <div
-          ref={containerRef}
-          className="cursor-grab active:cursor-grabbing"
+          className="touch-pan-x overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           dir="ltr"
         >
-          <motion.div
-            key={lang}
-            ref={trackRef}
-            className="flex gap-8"
-            drag="x"
-            dragConstraints={{ left: -constraint, right: 0 }}
-            dragElastic={0.08}
-          >
+          <div className="flex w-max gap-8 pb-1">
             {quotes.map((item) => (
               <div
                 key={item.name}
-                className={`w-[20rem] shrink-0 rounded-3xl p-8 text-ink sm:w-[24rem] sm:p-10 ${item.bg}`}
+                className={`w-[min(20rem,calc(100vw-3rem))] shrink-0 rounded-3xl p-8 text-ink sm:w-[24rem] sm:p-10 ${item.bg}`}
                 dir={isRtl ? "rtl" : "ltr"}
               >
                 <p className="font-display text-2xl leading-snug sm:text-3xl">
@@ -130,7 +116,7 @@ export default function Testimonials() {
                 </p>
               </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
