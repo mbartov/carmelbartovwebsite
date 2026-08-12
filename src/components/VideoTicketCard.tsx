@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { loadYouTubeIframeApi, type YTPlayer } from "@/lib/youtubeIframeApi";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useVideoPlayback } from "./VideoPlaybackContext";
 import { useLanguage } from "./LanguageContext";
 
@@ -46,13 +47,7 @@ export default function VideoTicketCard({
   const mountWrapperRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<YTPlayer | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isHoverCapable, setIsHoverCapable] = useState(false);
-
-  useEffect(() => {
-    setIsHoverCapable(
-      window.matchMedia("(hover: hover) and (pointer: fine)").matches
-    );
-  }, []);
+  const isHoverCapable = useMediaQuery("(hover: hover) and (pointer: fine)");
 
   // Mount the player immediately (not gated behind a click) so the iframe and
   // its player script are already warmed up by the time the user wants to

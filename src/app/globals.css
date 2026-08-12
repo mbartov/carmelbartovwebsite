@@ -58,90 +58,33 @@ body {
 
 @keyframes marquee {
   from {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translateX(-50%);
+    transform: translate3d(calc(-1 * var(--marquee-offset, 0px)), 0, 0);
   }
 }
 
-.animate-marquee {
-  animation: marquee 22s linear infinite;
+.marquee-track {
+  direction: ltr;
+  unicode-bidi: isolate;
+  will-change: transform;
 }
 
-@keyframes bulb-halo {
-  0%,
-  100% {
-    opacity: 0.45;
-    transform: scale(0.9);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.35);
-  }
-}
-
-@keyframes bulb-glow {
-  0%,
-  100% {
-    filter: drop-shadow(0 0 2px #9dff57) drop-shadow(0 0 6px rgba(157, 255, 87, 0.7));
-  }
-  50% {
-    filter: drop-shadow(0 0 4px #c8ff8a) drop-shadow(0 0 12px rgba(157, 255, 87, 1))
-      drop-shadow(0 0 20px rgba(157, 255, 87, 0.55));
-  }
-}
-
-.animate-bulb-halo {
-  animation: bulb-halo 2s ease-in-out infinite;
-}
-
-.animate-bulb-glow {
-  animation: bulb-glow 2s ease-in-out infinite;
-}
-
-@keyframes available-glow-spin {
-  to {
-    transform: rotate(360deg);
-  }
+.marquee-track--active {
+  animation: marquee var(--marquee-duration, 25s) linear infinite;
 }
 
 .available-glow-frame {
   position: absolute;
-  inset: -8px;
+  inset: -6px;
   border-radius: 9999px;
-  overflow: hidden;
   pointer-events: none;
   z-index: 0;
-}
-
-.available-glow-frame::before {
-  content: "";
-  position: absolute;
-  inset: -60%;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    transparent 70deg,
-    rgba(157, 255, 87, 0.15) 100deg,
-    #9dff57 140deg,
-    #c8ff8a 160deg,
-    #9dff57 180deg,
-    rgba(157, 255, 87, 0.15) 220deg,
-    transparent 250deg,
-    transparent 360deg
-  );
-  filter: blur(1.5px);
-  animation: available-glow-spin 2.4s linear infinite;
-}
-
-.available-glow-frame::after {
-  content: "";
-  position: absolute;
-  inset: 4px;
-  border-radius: 9999px;
-  background: var(--color-ink);
-  box-shadow: 0 0 14px rgba(157, 255, 87, 0.4);
+  box-shadow:
+    0 0 10px rgba(157, 255, 87, 0.55),
+    0 0 22px rgba(157, 255, 87, 0.3);
+  border: 2px solid rgba(157, 255, 87, 0.45);
 }
 
 .ticket-scallop {

@@ -3,14 +3,14 @@
 import {
   createContext,
   useContext,
-  useState,
   useCallback,
-  useEffect,
+  useSyncExternalStore,
 } from "react";
 
 export type Lang = "en" | "he";
 
 const STORAGE_KEY = "lang";
+const LANG_EVENT = "carmel-lang-change";
 
 type LanguageContextValue = {
   lang: Lang;
@@ -24,33 +24,39 @@ function applyDocumentAttrs(lang: Lang) {
   document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
 }
 
-function readStoredLang(): Lang {
-  const stored = window.localStorage.getItem(STORAGE_KEY);
-  if (stored === "en" || stored === "he") return stored;
-  return navigator.language.toLowerCase().startsWith("he") ? "he" : "en";
+function readLangFromDocument(): Lang {
+  return document.documentElement.lang === "he" ? "he" : "en";
 }
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  // Always start with "en" so SSR and the first client render match
-  const [lang, setLang] = useState<Lang>("en");
+function subscribeLang(callback: () => void) {
+  window.addEventListener(LANG_EVENT, callback);
+  return () => window.removeEventListener(LANG_EVENT, callback);
+}
 
-  useEffect(() => {
-    const stored = readStoredLang();
-    setLang(stored);
-    applyDocumentAttrs(stored);
-  }, []);
+function useLang(initialLang: Lang) {
+  return useSyncExternalStore(
+    subscribeLang,
+    readLangFromDocument,
+    () => initialLang
+  );
+}
 
-  useEffect(() => {
-    applyDocumentAttrs(lang);
-  }, [lang]);
+export function LanguageProvider({
+  children,
+  initialLang = "en",
+}: {
+  children: React.ReactNode;
+  initialLang?: Lang;
+}) {
+  const lang = useLang(initialLang);
 
   const toggle = useCallback(() => {
-    setLang((prev) => {
-      const next: Lang = prev === "en" ? "he" : "en";
-      window.localStorage.setItem(STORAGE_KEY, next);
-      return next;
-    });
-  }, []);
+    const next: Lang = lang === "en" ? "he" : "en";
+    window.localStorage.setItem(STORAGE_KEY, next);
+    document.cookie = `lang=${next};path=/;max-age=31536000;SameSite=Lax`;
+    applyDocumentAttrs(next);
+    window.dispatchEvent(new Event(LANG_EVENT));
+  }, [lang]);
 
   return (
     <LanguageContext.Provider value={{ lang, toggle }}>

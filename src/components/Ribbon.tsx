@@ -1,5 +1,6 @@
 "use client";
 
+import Marquee from "./Marquee";
 import { useLanguage } from "./LanguageContext";
 
 const copy = {
@@ -32,6 +33,16 @@ function Segment({ i, unit, tiny }: { i: number; unit: string; tiny: string }) {
   );
 }
 
+function RibbonUnit({ unit, tiny }: { unit: string; tiny: string }) {
+  return (
+    <div className="flex shrink-0">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <Segment key={i} i={i} unit={unit} tiny={tiny} />
+      ))}
+    </div>
+  );
+}
+
 export default function Ribbon() {
   const { lang } = useLanguage();
   const t = copy[lang];
@@ -39,18 +50,9 @@ export default function Ribbon() {
   return (
     <div className="overflow-hidden bg-ink py-10">
       <div className="-rotate-2 border-y-2 border-ink">
-        <div className="flex overflow-hidden whitespace-nowrap">
-          <div className="flex animate-marquee">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <Segment key={i} i={i} unit={t.unit} tiny={t.tiny} />
-            ))}
-          </div>
-          <div className="flex animate-marquee" aria-hidden>
-            {Array.from({ length: 8 }).map((_, i) => (
-              <Segment key={i} i={i} unit={t.unit} tiny={t.tiny} />
-            ))}
-          </div>
-        </div>
+        <Marquee speed={18}>
+          <RibbonUnit unit={t.unit} tiny={t.tiny} />
+        </Marquee>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
+import AvailableFloatingButton from "./AvailableFloatingButton";
 import Badge3D from "./Badge3DClient";
-import { AVAILABLE_BUTTON_ANCHOR_ID } from "./AvailableFloatingButton";
 import { useLanguage } from "./LanguageContext";
 import { WireframeInstagram, WireframeYouTube } from "./SocialIcons";
 
@@ -92,11 +92,7 @@ export default function Hero() {
           <p className="mt-6 max-w-md text-lg leading-relaxed text-ink/80">
             {t.sub}
           </p>
-          <div
-            id={AVAILABLE_BUTTON_ANCHOR_ID}
-            className="pointer-events-none mt-8 w-full max-w-md"
-            aria-hidden
-          />
+          <AvailableFloatingButton />
         </div>
       </div>
     </section>

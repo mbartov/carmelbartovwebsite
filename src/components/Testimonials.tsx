@@ -18,13 +18,6 @@ const quotesByLang = {
       role: "FILM TEACHER",
       bg: "bg-orange",
     },
-    {
-      quote:
-        "Our engagement doubled after Carmel started cutting our content. The numbers don't lie.",
-      name: "DANIEL ROSEN",
-      role: "CREATOR",
-      bg: "bg-purple",
-    },
   ],
   he: [
     {
@@ -41,13 +34,6 @@ const quotesByLang = {
       role: "מורה לקולנוע",
       bg: "bg-orange",
     },
-    {
-      quote:
-        "מעורבות הקהל שלנו הכפילה את עצמה מאז שכרמל התחילה לערוך את התוכן שלנו. המספרים לא משקרים.",
-      name: "דניאל רוזן",
-      role: "יוצר תוכן",
-      bg: "bg-purple",
-    },
   ],
 };
 
@@ -55,12 +41,10 @@ const copy = {
   en: {
     kicker: "[ Kind words ]",
     heading: "WHAT CLIENTS SAY",
-    drag: "[ Swipe → ]",
   },
   he: {
     kicker: "[ מילים טובות ]",
     heading: "מה הלקוחות אומרים",
-    drag: "[ החליקו → ]",
   },
 };
 
@@ -76,18 +60,13 @@ export default function Testimonials() {
       className="overflow-hidden bg-ink px-6 py-24 sm:px-10"
     >
       <div className="mx-auto max-w-6xl">
-        <div className="mb-12 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="mb-4 text-sm uppercase tracking-widest text-cream/60">
-              {t.kicker}
-            </p>
-            <h2 className="font-display text-4xl leading-[0.95] sm:text-5xl md:text-6xl">
-              {t.heading}
-            </h2>
-          </div>
-          <p className="hidden text-sm uppercase tracking-widest text-cream/50 sm:block">
-            {t.drag}
+        <div className="mb-12">
+          <p className="mb-4 text-sm uppercase tracking-widest text-cream/60">
+            {t.kicker}
           </p>
+          <h2 className="font-display text-4xl leading-[0.95] sm:text-5xl md:text-6xl">
+            {t.heading}
+          </h2>
         </div>
 
         {/*
