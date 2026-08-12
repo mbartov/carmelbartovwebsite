@@ -77,12 +77,10 @@ const copy = {
         FOR CREATORS &amp; BRANDS
       </>
     ),
-    hoverHint: "[ Hover the icons — they like to dance ]",
   },
   he: {
     bio: "שלום, אני כרמל ברטוב, עורכת וידאו עם ניסיון של מספר שנים ביצירת תוכן ועריכת וידאו. במהלך שירותי ביחידת דובר צה”ל ערכתי תוכן דיגיטלי וסרטונים פנימיים בשיתוף פעולה עם קצינים בכירים, בסביבה דינמית שדרשה דיוק, יצירתיות ועמידה בלוחות זמנים. עבורי, עריכה היא הרבה יותר מחיבור של שוטים- היא הדרך לספר סיפור, להעביר רגש ולגרום לצופים להישאר עד הפריים האחרון.",
     currentlyEditing: <>עורכת תוכן ליוצרים, עסקים ומותגים</>,
-    hoverHint: "[ רחפו מעל האייקונים — הם אוהבים לרקוד ]",
   },
 };
 
@@ -110,9 +108,6 @@ export default function About() {
             </div>
           ))}
         </div>
-        <p className="mt-8 text-center text-sm uppercase tracking-widest text-cream/50">
-          {t.hoverHint}
-        </p>
       </div>
     </section>
   );

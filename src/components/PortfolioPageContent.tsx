@@ -8,13 +8,11 @@ import { getAllProjects, projectTitle } from "@/lib/portfolio";
 
 const copy = {
   en: {
-    kicker: "[ Full archive ]",
     heading: "PORTFOLIO",
     sub: "Every reel, cut, and story from the edit bay.",
     back: "← Back to home",
   },
   he: {
-    kicker: "[ כל העבודות ]",
     heading: "תיק עבודות",
     sub: "כל הקליפים, העריכות והסיפורים מחדר העריכה.",
     back: "→ חזרה לדף הבית",
@@ -36,9 +34,6 @@ export default function PortfolioPageContent() {
           {t.back}
         </Link>
 
-        <p className="mb-4 text-sm uppercase tracking-widest text-cream/60">
-          {t.kicker}
-        </p>
         <h1 className="font-display text-4xl leading-[0.95] sm:text-5xl md:text-6xl">
           {t.heading}
         </h1>

@@ -9,7 +9,6 @@ import { getFeaturedProjects, projectTitle } from "@/lib/portfolio";
 
 const copy = {
   en: {
-    kicker: "[ Your ticket to visual storytelling ]",
     heading: (
       <>
         COME ON IN:
@@ -20,7 +19,6 @@ const copy = {
     cta: "Check out more projects",
   },
   he: {
-    kicker: "[ הכרטיס שלכם לסיפור חזותי ]",
     heading: (
       <>
         צללו פנימה:
@@ -40,9 +38,6 @@ export default function Portfolio() {
   return (
     <section id="portfolio" className="bg-ink px-6 py-24 sm:px-10">
       <div className="mx-auto max-w-6xl">
-        <p className="mb-4 text-sm uppercase tracking-widest text-cream/60">
-          {t.kicker}
-        </p>
         <h2 className="mb-12 font-display text-4xl leading-[0.95] sm:text-5xl md:text-6xl">
           {t.heading}
         </h2>
