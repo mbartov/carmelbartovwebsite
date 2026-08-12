@@ -3,6 +3,7 @@
 import AvailableFloatingButton from "./AvailableFloatingButton";
 import Badge3D from "./Badge3DClient";
 import { useLanguage } from "./LanguageContext";
+import { INSTAGRAM_URL, YOUTUBE_URL } from "@/lib/contact";
 import { WireframeInstagram, WireframeYouTube } from "./SocialIcons";
 
 const nav = {
@@ -62,7 +63,7 @@ export default function Hero() {
       {/* social icons */}
       <div className="absolute right-6 top-8 z-20 flex gap-3 sm:right-10 rtl:right-auto rtl:left-6 sm:rtl:left-10">
         <a
-          href="https://instagram.com/carmelbartov"
+          href={INSTAGRAM_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="flex h-12 w-12 items-center justify-center rounded-full bg-ink text-cream transition-transform hover:-translate-y-0.5"
@@ -71,7 +72,7 @@ export default function Hero() {
           <WireframeInstagram className="h-6 w-6" />
         </a>
         <a
-          href="https://youtube.com"
+          href={YOUTUBE_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="flex h-12 w-12 items-center justify-center rounded-full bg-ink text-cream transition-transform hover:-translate-y-0.5"

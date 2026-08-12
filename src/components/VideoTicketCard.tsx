@@ -46,8 +46,15 @@ export default function VideoTicketCard({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mountWrapperRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<YTPlayer | null>(null);
+  const playerReadyRef = useRef(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const isHoverCapable = useMediaQuery("(hover: hover) and (pointer: fine)");
+
+  const withReadyPlayer = (action: (player: YTPlayer) => void) => {
+    const player = playerRef.current;
+    if (!player || !playerReadyRef.current) return;
+    action(player);
+  };
 
   // Mount the player immediately (not gated behind a click) so the iframe and
   // its player script are already warmed up by the time the user wants to
@@ -74,6 +81,10 @@ export default function VideoTicketCard({
         videoId,
         playerVars: { rel: 0, playsinline: 1, modestbranding: 1 },
         events: {
+          onReady: () => {
+            if (cancelled) return;
+            playerReadyRef.current = true;
+          },
           onStateChange: (event) => {
             if (event.data === YT.PlayerState.PLAYING) {
               setIsPlaying(true);
@@ -91,6 +102,7 @@ export default function VideoTicketCard({
     });
     return () => {
       cancelled = true;
+      playerReadyRef.current = false;
       playerRef.current?.destroy();
       playerRef.current = null;
       target.remove();
@@ -102,7 +114,7 @@ export default function VideoTicketCard({
   // the active slot.
   useEffect(() => {
     if (activeId !== videoId && isPlaying) {
-      playerRef.current?.pauseVideo();
+      withReadyPlayer((player) => player.pauseVideo());
     }
   }, [activeId, videoId, isPlaying]);
 
@@ -113,13 +125,14 @@ export default function VideoTicketCard({
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (!playerRef.current) return;
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
-          playerRef.current.mute();
-          playerRef.current.playVideo();
-        } else {
-          playerRef.current.pauseVideo();
-        }
+        withReadyPlayer((player) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+            player.mute();
+            player.playVideo();
+          } else {
+            player.pauseVideo();
+          }
+        });
       },
       { threshold: [0, 0.6, 1] }
     );
@@ -129,22 +142,26 @@ export default function VideoTicketCard({
 
   const handleMouseEnter = () => {
     if (!isHoverCapable) return;
-    playerRef.current?.mute();
-    playerRef.current?.playVideo();
+    withReadyPlayer((player) => {
+      player.mute();
+      player.playVideo();
+    });
   };
 
   const handleMouseLeave = () => {
     if (!isHoverCapable) return;
-    playerRef.current?.pauseVideo();
+    withReadyPlayer((player) => player.pauseVideo());
   };
 
   const handlePlayClick = () => {
-    if (isPlaying) {
-      playerRef.current?.pauseVideo();
-      return;
-    }
-    playerRef.current?.unMute();
-    playerRef.current?.playVideo();
+    withReadyPlayer((player) => {
+      if (isPlaying) {
+        player.pauseVideo();
+        return;
+      }
+      player.unMute();
+      player.playVideo();
+    });
   };
 
   return (
