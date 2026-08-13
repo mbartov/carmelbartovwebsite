@@ -83,6 +83,17 @@ const quotesByLang = {
 
 const DESKTOP_STEP = 2;
 
+/** Mobile-only slide widths — desktop cards stay uniform at 24rem. */
+const MOBILE_SLIDE_WIDTHS = ["86%", "92%", "84%", "90%", "88%"] as const;
+const MOBILE_CARD_PADDING = ["p-5", "p-6", "p-5", "p-7", "p-6"] as const;
+const MOBILE_QUOTE_SIZE = [
+  "text-lg",
+  "text-xl",
+  "text-lg",
+  "text-xl",
+  "text-lg",
+] as const;
+
 const copy = {
   en: {
     heading: "WHAT CLIENTS SAY",
@@ -241,13 +252,22 @@ export default function Testimonials() {
                 ref={(el) => {
                   cardRefs.current[index] = el;
                 }}
-                className="box-border flex-[0_0_100%] snap-center px-1 md:flex-[0_0_24rem] md:snap-start md:px-0"
+                style={
+                  isDesktop
+                    ? undefined
+                    : {
+                        flex: `0 0 ${MOBILE_SLIDE_WIDTHS[index % MOBILE_SLIDE_WIDTHS.length]}`,
+                      }
+                }
+                className="box-border snap-center px-1 md:flex-[0_0_24rem] md:snap-start md:px-0"
               >
                 <div
-                  className={`rounded-3xl p-6 text-ink sm:p-7 md:p-8 ${item.bg}`}
+                  className={`rounded-3xl text-ink md:p-8 ${MOBILE_CARD_PADDING[index % MOBILE_CARD_PADDING.length]} ${item.bg}`}
                   dir={isRtl ? "rtl" : "ltr"}
                 >
-                  <p className="font-display text-xl leading-snug sm:text-2xl md:text-3xl">
+                  <p
+                    className={`font-display leading-snug md:text-3xl ${MOBILE_QUOTE_SIZE[index % MOBILE_QUOTE_SIZE.length]}`}
+                  >
                     &ldquo;{item.quote}&rdquo;
                   </p>
                   <p className="mt-6 text-sm font-semibold uppercase tracking-widest md:mt-8">
