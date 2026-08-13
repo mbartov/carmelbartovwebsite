@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLanguage } from "./LanguageContext";
 
 const quotesByLang = {
@@ -79,20 +80,126 @@ const quotesByLang = {
   ],
 };
 
+const STEP = 2;
+
 const copy = {
   en: {
     heading: "WHAT CLIENTS SAY",
+    prev: "Previous testimonials",
+    next: "Next testimonials",
   },
   he: {
     heading: "מה הלקוחות אומרים",
+    prev: "המלצות קודמות",
+    next: "המלצות הבאות",
   },
 };
+
+function ChevronIcon({ direction }: { direction: "left" | "right" }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {direction === "left" ? (
+        <path d="M15 6l-6 6 6 6" />
+      ) : (
+        <path d="M9 6l6 6-6 6" />
+      )}
+    </svg>
+  );
+}
 
 export default function Testimonials() {
   const { lang } = useLanguage();
   const quotes = quotesByLang[lang];
   const t = copy[lang];
   const isRtl = lang === "he";
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const scrollToIndex = useCallback((index: number) => {
+    const container = scrollRef.current;
+    const card = cardRefs.current[index];
+    if (!container || !card) return;
+
+    const targetLeft =
+      card.getBoundingClientRect().left -
+      container.getBoundingClientRect().left +
+      container.scrollLeft;
+
+    container.scrollTo({
+      left: targetLeft,
+      behavior: "smooth",
+    });
+    setActiveIndex(index);
+  }, []);
+
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    let timeout: ReturnType<typeof setTimeout>;
+    const syncActiveIndex = () => {
+      const cards = cardRefs.current.filter(Boolean) as HTMLDivElement[];
+      if (cards.length === 0) return;
+
+      const scrollLeft = container.scrollLeft;
+      let closest = 0;
+      let minDistance = Infinity;
+
+      cards.forEach((card, index) => {
+        const cardLeft =
+          card.getBoundingClientRect().left -
+          container.getBoundingClientRect().left +
+          scrollLeft;
+        const distance = Math.abs(cardLeft - scrollLeft);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closest = index;
+        }
+      });
+
+      setActiveIndex(closest);
+    };
+
+    const onScroll = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(syncActiveIndex, 120);
+    };
+
+    container.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      clearTimeout(timeout);
+      container.removeEventListener("scroll", onScroll);
+    };
+  }, [quotes.length, lang]);
+
+  useEffect(() => {
+    scrollToIndex(0);
+  }, [lang, scrollToIndex]);
+
+  const canGoPrev = activeIndex > 0;
+  const canGoNext = activeIndex < quotes.length - 1;
+
+  const goBy = (delta: number) => {
+    const nextIndex = Math.min(
+      quotes.length - 1,
+      Math.max(0, activeIndex + delta),
+    );
+    scrollToIndex(nextIndex);
+  };
+
+  const arrowButtonClass =
+    "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-cream/30 text-cream transition enabled:hover:border-cream enabled:hover:bg-cream/10 disabled:cursor-not-allowed disabled:opacity-30 sm:h-12 sm:w-12";
 
   return (
     <section
@@ -107,32 +214,56 @@ export default function Testimonials() {
         </div>
 
         {/*
-          Native overflow scroll (dir=ltr) — framer dragConstraints invert under
-          page RTL and trap Hebrew mobile users on the wrong axis.
+          Row stays LTR so right = forward and left = back in Hebrew and English.
         */}
-        <div
-          className="touch-pan-x overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          dir="ltr"
-        >
-          <div className="flex w-max gap-8 pb-1">
-            {quotes.map((item) => (
-              <div
-                key={item.name}
-                className={`w-[min(20rem,calc(100vw-3rem))] shrink-0 rounded-3xl p-8 text-ink sm:w-[24rem] sm:p-10 ${item.bg}`}
-                dir={isRtl ? "rtl" : "ltr"}
-              >
-                <p className="font-display text-2xl leading-snug sm:text-3xl">
-                  &ldquo;{item.quote}&rdquo;
-                </p>
-                <p className="mt-8 text-sm font-semibold uppercase tracking-widest">
-                  {item.name}
-                </p>
-                <p className="text-xs uppercase tracking-widest opacity-70">
-                  {item.role}
-                </p>
-              </div>
-            ))}
+        <div className="flex items-center gap-3 sm:gap-4" dir="ltr">
+          <button
+            type="button"
+            aria-label={t.prev}
+            disabled={!canGoPrev}
+            onClick={() => goBy(-STEP)}
+            className={arrowButtonClass}
+          >
+            <ChevronIcon direction="left" />
+          </button>
+
+          <div
+            ref={scrollRef}
+            className="min-w-0 flex-1 touch-pan-x snap-x snap-mandatory overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            <div className="flex w-max gap-8 pb-1">
+              {quotes.map((item, index) => (
+                <div
+                  key={item.name}
+                  ref={(el) => {
+                    cardRefs.current[index] = el;
+                  }}
+                  className={`w-[min(18rem,calc(100vw-7rem))] shrink-0 snap-start snap-always rounded-3xl p-8 text-ink sm:w-[22rem] sm:p-10 md:w-[24rem] ${item.bg}`}
+                  dir={isRtl ? "rtl" : "ltr"}
+                >
+                  <p className="font-display text-2xl leading-snug sm:text-3xl">
+                    &ldquo;{item.quote}&rdquo;
+                  </p>
+                  <p className="mt-8 text-sm font-semibold uppercase tracking-widest">
+                    {item.name}
+                  </p>
+                  <p className="text-xs uppercase tracking-widest opacity-70">
+                    {item.role}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
+
+          <button
+            type="button"
+            aria-label={t.next}
+            disabled={!canGoNext}
+            onClick={() => goBy(STEP)}
+            className={arrowButtonClass}
+          >
+            <ChevronIcon direction="right" />
+          </button>
         </div>
       </div>
     </section>
