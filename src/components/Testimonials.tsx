@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useLanguage } from "./LanguageContext";
 
 const quotesByLang = {
@@ -80,18 +81,22 @@ const quotesByLang = {
   ],
 };
 
-const STEP = 2;
+const DESKTOP_STEP = 2;
 
 const copy = {
   en: {
     heading: "WHAT CLIENTS SAY",
-    prev: "Previous testimonials",
-    next: "Next testimonials",
+    prev: "Previous testimonial",
+    prevMany: "Previous testimonials",
+    next: "Next testimonial",
+    nextMany: "Next testimonials",
   },
   he: {
     heading: "מה הלקוחות אומרים",
-    prev: "המלצות קודמות",
-    next: "המלצות הבאות",
+    prev: "המלצה קודמת",
+    prevMany: "המלצות קודמות",
+    next: "המלצה הבאה",
+    nextMany: "המלצות הבאות",
   },
 };
 
@@ -121,6 +126,8 @@ export default function Testimonials() {
   const quotes = quotesByLang[lang];
   const t = copy[lang];
   const isRtl = lang === "he";
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const step = isDesktop ? DESKTOP_STEP : 1;
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -199,7 +206,7 @@ export default function Testimonials() {
   };
 
   const arrowButtonClass =
-    "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-cream/30 text-cream transition enabled:hover:border-cream enabled:hover:bg-cream/10 disabled:cursor-not-allowed disabled:opacity-30 sm:h-12 sm:w-12";
+    "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-cream/30 text-cream transition enabled:hover:border-cream enabled:hover:bg-cream/10 disabled:cursor-not-allowed disabled:opacity-30 md:h-12 md:w-12";
 
   return (
     <section
@@ -213,15 +220,12 @@ export default function Testimonials() {
           </h2>
         </div>
 
-        {/*
-          Row stays LTR so right = forward and left = back in Hebrew and English.
-        */}
-        <div className="flex items-center gap-3 sm:gap-4" dir="ltr">
+        <div className="flex items-center gap-2 md:gap-4" dir="ltr">
           <button
             type="button"
-            aria-label={t.prev}
+            aria-label={step > 1 ? t.prevMany : t.prev}
             disabled={!canGoPrev}
-            onClick={() => goBy(-STEP)}
+            onClick={() => goBy(-step)}
             className={arrowButtonClass}
           >
             <ChevronIcon direction="left" />
@@ -229,37 +233,39 @@ export default function Testimonials() {
 
           <div
             ref={scrollRef}
-            className="min-w-0 flex-1 touch-pan-x snap-x snap-mandatory overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex min-w-0 flex-1 touch-pan-x snap-x snap-mandatory overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] md:gap-8 [&::-webkit-scrollbar]:hidden"
           >
-            <div className="flex w-max gap-8 pb-1">
-              {quotes.map((item, index) => (
+            {quotes.map((item, index) => (
+              <div
+                key={item.name}
+                ref={(el) => {
+                  cardRefs.current[index] = el;
+                }}
+                className="box-border flex-[0_0_100%] snap-center px-1 md:flex-[0_0_24rem] md:snap-start md:px-0"
+              >
                 <div
-                  key={item.name}
-                  ref={(el) => {
-                    cardRefs.current[index] = el;
-                  }}
-                  className={`w-[min(18rem,calc(100vw-7rem))] shrink-0 snap-start snap-always rounded-3xl p-8 text-ink sm:w-[22rem] sm:p-10 md:w-[24rem] ${item.bg}`}
+                  className={`rounded-3xl p-6 text-ink sm:p-7 md:p-8 ${item.bg}`}
                   dir={isRtl ? "rtl" : "ltr"}
                 >
-                  <p className="font-display text-2xl leading-snug sm:text-3xl">
+                  <p className="font-display text-xl leading-snug sm:text-2xl md:text-3xl">
                     &ldquo;{item.quote}&rdquo;
                   </p>
-                  <p className="mt-8 text-sm font-semibold uppercase tracking-widest">
+                  <p className="mt-6 text-sm font-semibold uppercase tracking-widest md:mt-8">
                     {item.name}
                   </p>
                   <p className="text-xs uppercase tracking-widest opacity-70">
                     {item.role}
                   </p>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
 
           <button
             type="button"
-            aria-label={t.next}
+            aria-label={step > 1 ? t.nextMany : t.next}
             disabled={!canGoNext}
-            onClick={() => goBy(STEP)}
+            onClick={() => goBy(step)}
             className={arrowButtonClass}
           >
             <ChevronIcon direction="right" />
