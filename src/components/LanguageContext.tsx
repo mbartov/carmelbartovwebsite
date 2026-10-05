@@ -4,14 +4,13 @@ import {
   createContext,
   useContext,
   useCallback,
-  useEffect,
   useSyncExternalStore,
 } from "react";
-import { usePathname } from "next/navigation";
 
 export type Lang = "en" | "he";
 
 const STORAGE_KEY = "lang";
+const LANG_EVENT = "carmel-lang-change";
 
 type LanguageContextValue = {
   lang: Lang;
@@ -20,46 +19,43 @@ type LanguageContextValue = {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-function applyDocumentAttrs(lang: Lang, isAdmin: boolean) {
-  if (isAdmin) {
-    document.documentElement.lang = "he";
-    document.documentElement.dir = "rtl";
-    return;
-  }
+function applyDocumentAttrs(lang: Lang) {
   document.documentElement.lang = lang === "he" ? "he" : "en";
   document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
 }
 
-const listeners = new Set<() => void>();
-
-function readStoredLang(): Lang {
-  const stored = window.localStorage.getItem(STORAGE_KEY);
-  if (stored === "en" || stored === "he") return stored;
-  return navigator.language.toLowerCase().startsWith("he") ? "he" : "en";
+function readLangFromDocument(): Lang {
+  return document.documentElement.lang === "he" ? "he" : "en";
 }
 
-function subscribe(listener: () => void) {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
+function subscribeLang(callback: () => void) {
+  window.addEventListener(LANG_EVENT, callback);
+  return () => window.removeEventListener(LANG_EVENT, callback);
 }
 
-function serverLang(): Lang {
-  return "en";
+function useLang(initialLang: Lang) {
+  return useSyncExternalStore(
+    subscribeLang,
+    readLangFromDocument,
+    () => initialLang
+  );
 }
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  // Server snapshot is always "en" so the first render matches SSR.
-  const lang = useSyncExternalStore(subscribe, readStoredLang, serverLang);
-  const isAdmin = usePathname().startsWith("/admin");
-
-  useEffect(() => {
-    applyDocumentAttrs(lang, isAdmin);
-  }, [lang, isAdmin]);
+export function LanguageProvider({
+  children,
+  initialLang = "en",
+}: {
+  children: React.ReactNode;
+  initialLang?: Lang;
+}) {
+  const lang = useLang(initialLang);
 
   const toggle = useCallback(() => {
     const next: Lang = lang === "en" ? "he" : "en";
     window.localStorage.setItem(STORAGE_KEY, next);
-    listeners.forEach((listener) => listener());
+    document.cookie = `lang=${next};path=/;max-age=31536000;SameSite=Lax`;
+    applyDocumentAttrs(next);
+    window.dispatchEvent(new Event(LANG_EVENT));
   }, [lang]);
 
   return (

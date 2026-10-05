@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { PortfolioItem } from "@/lib/content";
 import VideoTicketCard from "./VideoTicketCard";
 import StackReveal from "./StackReveal";
@@ -8,7 +9,6 @@ import { useLanguage } from "./LanguageContext";
 
 const copy = {
   en: {
-    kicker: "[ Your ticket to visual storytelling ]",
     heading: (
       <>
         COME ON IN:
@@ -19,7 +19,6 @@ const copy = {
     cta: "Check out more projects",
   },
   he: {
-    kicker: "[ הכרטיס שלכם לסיפור חזותי ]",
     heading: (
       <>
         צללו פנימה:
@@ -38,9 +37,6 @@ export default function Portfolio({ items }: { items: PortfolioItem[] }) {
   return (
     <section id="portfolio" className="bg-ink px-6 py-24 sm:px-10">
       <div className="mx-auto max-w-6xl">
-        <p className="mb-4 text-sm uppercase tracking-widest text-cream/60">
-          {t.kicker}
-        </p>
         <h2 className="mb-12 font-display text-4xl leading-[0.95] sm:text-5xl md:text-6xl">
           {t.heading}
         </h2>
@@ -59,14 +55,12 @@ export default function Portfolio({ items }: { items: PortfolioItem[] }) {
         </VideoPlaybackProvider>
 
         <div className="mt-14 flex justify-center">
-          <a
-            href="https://instagram.com/carmelbartov"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/portfolio"
             className="rounded-full bg-yellow px-8 py-4 font-medium text-ink transition-transform hover:-translate-y-0.5"
           >
             {t.cta}
-          </a>
+          </Link>
         </div>
       </div>
     </section>

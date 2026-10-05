@@ -59,8 +59,8 @@ const milestonesByLang = {
 };
 
 const copy = {
-  en: { kicker: "[ Where it started, where it's headed ]", heading: "THE PATH SO FAR" },
-  he: { kicker: "[ מאיפה זה התחיל, ולאן זה הולך ]", heading: "הדרך עד כה" },
+  en: { heading: "THE PATH SO FAR" },
+  he: { heading: "הדרך עד כה" },
 };
 
 export default function Path() {
@@ -71,9 +71,6 @@ export default function Path() {
   return (
     <section id="path" className="bg-ink px-6 py-24 sm:px-10">
       <div className="mx-auto max-w-4xl">
-        <p className="mb-4 text-sm uppercase tracking-widest text-cream/60">
-          {t.kicker}
-        </p>
         <h2 className="mb-16 font-display text-4xl leading-[0.95] sm:text-5xl md:text-6xl">
           {t.heading}
         </h2>

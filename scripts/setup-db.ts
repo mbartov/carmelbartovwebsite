@@ -24,13 +24,12 @@ function statements(sqlText: string) {
     .filter(Boolean);
 }
 
-function isLocalDatabase(url: string) {
-  const hostname = new URL(url).hostname;
-  return hostname === "localhost" || hostname === "127.0.0.1";
+function isNeonDatabase(url: string) {
+  return new URL(url).hostname.endsWith(".neon.tech");
 }
 
 function createRunner(url: string): Runner {
-  if (isLocalDatabase(url)) {
+  if (!isNeonDatabase(url)) {
     const pg = postgres(url, { max: 1 });
     return {
       sql: (strings, ...values) =>

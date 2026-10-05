@@ -33,7 +33,6 @@ function servicesFor(lang: keyof typeof serviceTagsByLang) {
 const copy = {
   en: {
     heading: "THE FULL SETLIST: MY EDITING SERVICES",
-    sub: "[ From social reels to full campaigns, I offer a complete range of editing services to make your story shine ]",
     ctaHeading: (
       <>
         DID NOT FIND
@@ -45,7 +44,6 @@ const copy = {
   },
   he: {
     heading: "רשימת השירותים שלי",
-    sub: "[ מרילז ברשתות ועד קמפיינים מלאים, אני מציעה מגוון שלם של שירותי עריכה שיגרמו לסיפור שלכם לזרוח ]",
     ctaHeading: (
       <>
         לא מצאתם
@@ -68,9 +66,6 @@ export default function Services() {
         <h2 className="text-center font-display text-4xl leading-[0.95] sm:text-5xl md:text-6xl">
           {t.heading}
         </h2>
-        <p className="mx-auto mt-6 max-w-xl text-center text-cream/70">
-          {t.sub}
-        </p>
 
         <StackReveal className="mt-16 flex flex-wrap justify-center gap-12">
           {[

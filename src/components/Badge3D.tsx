@@ -14,6 +14,7 @@ import {
   type RapierRigidBody,
 } from "@react-three/rapier";
 import { MeshLineGeometry, MeshLineMaterial } from "meshline";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useLanguage, type Lang } from "./LanguageContext";
 
 extend({ MeshLineGeometry, MeshLineMaterial });
@@ -148,15 +149,7 @@ function CardFace({ lang }: { lang: Lang }) {
 }
 
 function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const mql = window.matchMedia("(max-width: 639px)");
-    setIsMobile(mql.matches);
-    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mql.addEventListener("change", onChange);
-    return () => mql.removeEventListener("change", onChange);
-  }, []);
-  return isMobile;
+  return useMediaQuery("(max-width: 639px)");
 }
 
 function Lanyard({ anchorX, lang }: { anchorX: number; lang: Lang }) {

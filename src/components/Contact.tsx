@@ -1,6 +1,6 @@
 "use client";
 
-import { CONTACT_EMAIL } from "@/lib/contact";
+import { CONTACT_EMAIL, INSTAGRAM_URL, YOUTUBE_URL } from "@/lib/contact";
 import { useLanguage } from "./LanguageContext";
 import {
   WireframeEmail,
@@ -28,7 +28,7 @@ const copy = {
         וניצור ביחד
       </>
     ),
-    body: "ש לכם פרויקט? אשמח לשמוע עליו ולחשוב יחד איך להפוך אותו לסרטון מדויק ומרשים",
+    body: "יש לכם פרויקט? אשמח לשמוע עליו ולחשוב יחד איך להפוך אותו לסרטון מדויק ומרשים",
     cta: "צרו איתי קשר",
   },
 };
@@ -60,7 +60,7 @@ export default function Contact() {
 
           <div className="flex gap-3">
             <a
-              href="https://instagram.com/carmelbartov"
+              href={INSTAGRAM_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="flex h-12 w-12 items-center justify-center rounded-full bg-cream text-green"
@@ -69,7 +69,7 @@ export default function Contact() {
               <WireframeInstagram className="h-6 w-6" />
             </a>
             <a
-              href="https://youtube.com"
+              href={YOUTUBE_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="flex h-12 w-12 items-center justify-center rounded-full bg-cream text-green"

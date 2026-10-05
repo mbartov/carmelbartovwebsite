@@ -10,9 +10,8 @@ export type Sql = (
 
 let cached: Sql | undefined;
 
-function isLocalDatabase(url: string) {
-  const hostname = new URL(url).hostname;
-  return hostname === "localhost" || hostname === "127.0.0.1";
+function isNeonDatabase(url: string) {
+  return new URL(url).hostname.endsWith(".neon.tech");
 }
 
 export function getSql(): Sql {
@@ -21,9 +20,9 @@ export function getSql(): Sql {
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error("DATABASE_URL is not set");
 
-  // The Neon HTTP driver only speaks to Neon hosts. Local Postgres uses a
-  // single TCP connection with the same tagged-template call shape.
-  if (isLocalDatabase(url)) {
+  // The Neon HTTP driver only speaks to Neon. Every other Postgres, including
+  // local Docker and Render, uses a TCP connection with the same call shape.
+  if (!isNeonDatabase(url)) {
     const pg = postgres(url, { max: 1, idle_timeout: 1 });
     cached = (strings, ...values) =>
       pg(strings, ...(values as never[])) as unknown as Promise<

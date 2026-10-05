@@ -1,26 +1,154 @@
 "use client";
 
+import { useCallback, useEffect, useRef, useState } from "react";
 import { colorMap } from "@/lib/colors";
 import type { Testimonial } from "@/lib/content";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useLanguage } from "./LanguageContext";
+
+const DESKTOP_STEP = 2;
+
+/** Mobile-only slide widths — desktop cards stay uniform at 24rem. */
+const MOBILE_SLIDE_WIDTHS = ["86%", "92%", "84%", "90%", "88%"] as const;
+const MOBILE_CARD_PADDING = ["p-5", "p-6", "p-5", "p-7", "p-6"] as const;
+const MOBILE_QUOTE_SIZE = [
+  "text-lg",
+  "text-xl",
+  "text-lg",
+  "text-xl",
+  "text-lg",
+] as const;
 
 const copy = {
   en: {
-    kicker: "[ Kind words ]",
     heading: "WHAT CLIENTS SAY",
-    drag: "[ Swipe → ]",
+    prev: "Previous testimonial",
+    prevMany: "Previous testimonials",
+    next: "Next testimonial",
+    nextMany: "Next testimonials",
   },
   he: {
-    kicker: "[ מילים טובות ]",
     heading: "מה הלקוחות אומרים",
-    drag: "[ החליקו → ]",
+    prev: "המלצה קודמת",
+    prevMany: "המלצות קודמות",
+    next: "המלצה הבאה",
+    nextMany: "המלצות הבאות",
   },
 };
 
+function ChevronIcon({ direction }: { direction: "left" | "right" }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {direction === "left" ? (
+        <path d="M15 6l-6 6 6 6" />
+      ) : (
+        <path d="M9 6l6 6-6 6" />
+      )}
+    </svg>
+  );
+}
+
 export default function Testimonials({ items }: { items: Testimonial[] }) {
   const { lang } = useLanguage();
+  const quotes = items.map((item) => ({
+    id: item.id,
+    quote: lang === "he" ? item.quoteHe : item.quoteEn,
+    name: lang === "he" ? item.nameHe : item.nameEn,
+    role: lang === "he" ? item.roleHe : item.roleEn,
+    bg: colorMap[item.color],
+  }));
   const t = copy[lang];
   const isRtl = lang === "he";
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const step = isDesktop ? DESKTOP_STEP : 1;
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const scrollToIndex = useCallback((index: number) => {
+    const container = scrollRef.current;
+    const card = cardRefs.current[index];
+    if (!container || !card) return;
+
+    const targetLeft =
+      card.getBoundingClientRect().left -
+      container.getBoundingClientRect().left +
+      container.scrollLeft;
+
+    container.scrollTo({
+      left: targetLeft,
+      behavior: "smooth",
+    });
+    setActiveIndex(index);
+  }, []);
+
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    let timeout: ReturnType<typeof setTimeout>;
+    const syncActiveIndex = () => {
+      const cards = cardRefs.current.filter(Boolean) as HTMLDivElement[];
+      if (cards.length === 0) return;
+
+      const scrollLeft = container.scrollLeft;
+      let closest = 0;
+      let minDistance = Infinity;
+
+      cards.forEach((card, index) => {
+        const cardLeft =
+          card.getBoundingClientRect().left -
+          container.getBoundingClientRect().left +
+          scrollLeft;
+        const distance = Math.abs(cardLeft - scrollLeft);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closest = index;
+        }
+      });
+
+      setActiveIndex(closest);
+    };
+
+    const onScroll = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(syncActiveIndex, 120);
+    };
+
+    container.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      clearTimeout(timeout);
+      container.removeEventListener("scroll", onScroll);
+    };
+  }, [items.length, lang]);
+
+  useEffect(() => {
+    scrollToIndex(0);
+  }, [lang, scrollToIndex]);
+
+  const canGoPrev = activeIndex > 0;
+  const canGoNext = activeIndex < quotes.length - 1;
+
+  const goBy = (delta: number) => {
+    const nextIndex = Math.min(
+      quotes.length - 1,
+      Math.max(0, activeIndex + delta),
+    );
+    scrollToIndex(nextIndex);
+  };
+
+  const arrowButtonClass =
+    "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-cream/30 text-cream transition enabled:hover:border-cream enabled:hover:bg-cream/10 disabled:cursor-not-allowed disabled:opacity-30 md:h-12 md:w-12";
 
   return (
     <section
@@ -28,47 +156,71 @@ export default function Testimonials({ items }: { items: Testimonial[] }) {
       className="overflow-hidden bg-ink px-6 py-24 sm:px-10"
     >
       <div className="mx-auto max-w-6xl">
-        <div className="mb-12 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="mb-4 text-sm uppercase tracking-widest text-cream/60">
-              {t.kicker}
-            </p>
-            <h2 className="font-display text-4xl leading-[0.95] sm:text-5xl md:text-6xl">
-              {t.heading}
-            </h2>
-          </div>
-          <p className="hidden text-sm uppercase tracking-widest text-cream/50 sm:block">
-            {t.drag}
-          </p>
+        <div className="mb-12">
+          <h2 className="font-display text-4xl leading-[0.95] sm:text-5xl md:text-6xl">
+            {t.heading}
+          </h2>
         </div>
 
-        {/*
-          Native overflow scroll (dir=ltr) — framer dragConstraints invert under
-          page RTL and trap Hebrew mobile users on the wrong axis.
-        */}
-        <div
-          className="touch-pan-x overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          dir="ltr"
-        >
-          <div className="flex w-max gap-8 pb-1">
-            {items.map((item) => (
+        <div className="flex items-center gap-2 md:gap-4" dir="ltr">
+          <button
+            type="button"
+            aria-label={step > 1 ? t.prevMany : t.prev}
+            disabled={!canGoPrev}
+            onClick={() => goBy(-step)}
+            className={arrowButtonClass}
+          >
+            <ChevronIcon direction="left" />
+          </button>
+
+          <div
+            ref={scrollRef}
+            className="flex min-w-0 flex-1 touch-pan-x snap-x snap-mandatory overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] md:gap-8 [&::-webkit-scrollbar]:hidden"
+          >
+            {quotes.map((item, index) => (
               <div
                 key={item.id}
-                className={`w-[min(20rem,calc(100vw-3rem))] shrink-0 rounded-3xl p-8 text-ink sm:w-[24rem] sm:p-10 ${colorMap[item.color]}`}
-                dir={isRtl ? "rtl" : "ltr"}
+                ref={(el) => {
+                  cardRefs.current[index] = el;
+                }}
+                style={
+                  isDesktop
+                    ? undefined
+                    : {
+                        flex: `0 0 ${MOBILE_SLIDE_WIDTHS[index % MOBILE_SLIDE_WIDTHS.length]}`,
+                      }
+                }
+                className="box-border snap-center px-1 md:flex-[0_0_24rem] md:snap-start md:px-0"
               >
-                <p className="font-display text-2xl leading-snug sm:text-3xl">
-                  &ldquo;{lang === "he" ? item.quoteHe : item.quoteEn}&rdquo;
-                </p>
-                <p className="mt-8 text-sm font-semibold uppercase tracking-widest">
-                  {lang === "he" ? item.nameHe : item.nameEn}
-                </p>
-                <p className="text-xs uppercase tracking-widest opacity-70">
-                  {lang === "he" ? item.roleHe : item.roleEn}
-                </p>
+                <div
+                  className={`rounded-3xl text-ink md:p-8 ${MOBILE_CARD_PADDING[index % MOBILE_CARD_PADDING.length]} ${item.bg}`}
+                  dir={isRtl ? "rtl" : "ltr"}
+                >
+                  <p
+                    className={`font-display leading-snug md:text-3xl ${MOBILE_QUOTE_SIZE[index % MOBILE_QUOTE_SIZE.length]}`}
+                  >
+                    &ldquo;{item.quote}&rdquo;
+                  </p>
+                  <p className="mt-6 text-sm font-semibold uppercase tracking-widest md:mt-8">
+                    {item.name}
+                  </p>
+                  <p className="text-xs uppercase tracking-widest opacity-70">
+                    {item.role}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
+
+          <button
+            type="button"
+            aria-label={step > 1 ? t.nextMany : t.next}
+            disabled={!canGoNext}
+            onClick={() => goBy(step)}
+            className={arrowButtonClass}
+          >
+            <ChevronIcon direction="right" />
+          </button>
         </div>
       </div>
     </section>

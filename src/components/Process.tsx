@@ -61,8 +61,8 @@ const stepsByLang = {
 };
 
 const copy = {
-  en: { kicker: "[ Scroll to spread the deck ]", heading: "HOW WE'LL WORK" },
-  he: { kicker: "[ גללו כדי לפרוש את הקלפים ]", heading: "איך נעבוד" },
+  en: { heading: "HOW WE'LL WORK" },
+  he: { heading: "איך נעבוד" },
 };
 
 export default function Process() {
@@ -73,9 +73,6 @@ export default function Process() {
   return (
     <section id="process" className="bg-ink px-6 py-24 sm:px-10">
       <div className="mx-auto max-w-4xl">
-        <p className="mb-4 text-sm uppercase tracking-widest text-cream/60">
-          {t.kicker}
-        </p>
         <h2 className="mb-16 font-display text-4xl leading-[0.95] sm:text-5xl md:text-6xl">
           {t.heading}
         </h2>
