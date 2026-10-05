@@ -1,55 +1,8 @@
 "use client";
 
+import { colorMap } from "@/lib/colors";
+import type { Testimonial } from "@/lib/content";
 import { useLanguage } from "./LanguageContext";
-
-const quotesByLang = {
-  en: [
-    {
-      quote:
-        "Fast, precise, and genuinely creative. Carmel understood the story we needed before we did.",
-      name: "AVIA ROZALIO",
-      role: "MAJOR, IDF SPOKESMAN",
-      bg: "bg-pink-bright",
-    },
-    {
-      quote:
-        "She is a dedicated team member who contributes a lot to a film's success.",
-      name: "YARON ROTENBERG",
-      role: "FILM TEACHER",
-      bg: "bg-orange",
-    },
-    {
-      quote:
-        "Our engagement doubled after Carmel started cutting our content. The numbers don't lie.",
-      name: "DANIEL ROSEN",
-      role: "CREATOR",
-      bg: "bg-purple",
-    },
-  ],
-  he: [
-    {
-      quote:
-        "מהירה, מדויקת ויצירתית באמת. כרמל הבינה את הסיפור שהיינו צריכים עוד לפני שאנחנו הבנו.",
-      name: "אביה רוזליו",
-      role: 'סרן, דובר צה"ל',
-      bg: "bg-pink-bright",
-    },
-    {
-      quote:
-        "כל צוות שיפיק ויצור סרט יזכה בה כחברת צוות משקיעה ותורמת רבות להצלחת הסרט.",
-      name: "ירון רוטנברג",
-      role: "מורה לקולנוע",
-      bg: "bg-orange",
-    },
-    {
-      quote:
-        "מעורבות הקהל שלנו הכפילה את עצמה מאז שכרמל התחילה לערוך את התוכן שלנו. המספרים לא משקרים.",
-      name: "דניאל רוזן",
-      role: "יוצר תוכן",
-      bg: "bg-purple",
-    },
-  ],
-};
 
 const copy = {
   en: {
@@ -64,9 +17,8 @@ const copy = {
   },
 };
 
-export default function Testimonials() {
+export default function Testimonials({ items }: { items: Testimonial[] }) {
   const { lang } = useLanguage();
-  const quotes = quotesByLang[lang];
   const t = copy[lang];
   const isRtl = lang === "he";
 
@@ -99,20 +51,20 @@ export default function Testimonials() {
           dir="ltr"
         >
           <div className="flex w-max gap-8 pb-1">
-            {quotes.map((item) => (
+            {items.map((item) => (
               <div
-                key={item.name}
-                className={`w-[min(20rem,calc(100vw-3rem))] shrink-0 rounded-3xl p-8 text-ink sm:w-[24rem] sm:p-10 ${item.bg}`}
+                key={item.id}
+                className={`w-[min(20rem,calc(100vw-3rem))] shrink-0 rounded-3xl p-8 text-ink sm:w-[24rem] sm:p-10 ${colorMap[item.color]}`}
                 dir={isRtl ? "rtl" : "ltr"}
               >
                 <p className="font-display text-2xl leading-snug sm:text-3xl">
-                  &ldquo;{item.quote}&rdquo;
+                  &ldquo;{lang === "he" ? item.quoteHe : item.quoteEn}&rdquo;
                 </p>
                 <p className="mt-8 text-sm font-semibold uppercase tracking-widest">
-                  {item.name}
+                  {lang === "he" ? item.nameHe : item.nameEn}
                 </p>
                 <p className="text-xs uppercase tracking-widest opacity-70">
-                  {item.role}
+                  {lang === "he" ? item.roleHe : item.roleEn}
                 </p>
               </div>
             ))}

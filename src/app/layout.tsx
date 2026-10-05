@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Anton, Inter, Rubik } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/components/LanguageContext";
-import LanguageToggle from "@/components/LanguageToggle";
-import AvailableFloatingButton from "@/components/AvailableFloatingButton";
+import SiteChrome from "@/components/SiteChrome";
 
 const anton = Anton({
   variable: "--font-anton",
@@ -44,15 +43,13 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var l=localStorage.getItem("lang");if(l!=="en"&&l!=="he"){l=navigator.language.toLowerCase().indexOf("he")===0?"he":"en"}document.documentElement.lang=l;document.documentElement.dir=l==="he"?"rtl":"ltr"}catch(e){}})()`,
+            __html: `(function(){try{var p=location.pathname;if(p==="/admin"||p.indexOf("/admin/")===0){document.documentElement.lang="he";document.documentElement.dir="rtl";return}var l=localStorage.getItem("lang");if(l!=="en"&&l!=="he"){l=navigator.language.toLowerCase().indexOf("he")===0?"he":"en"}document.documentElement.lang=l;document.documentElement.dir=l==="he"?"rtl":"ltr"}catch(e){}})()`,
           }}
         />
       </head>
       <body className="min-h-full flex flex-col bg-ink text-cream font-sans overflow-x-hidden overflow-y-visible">
         <LanguageProvider>
-          <LanguageToggle />
-          {children}
-          <AvailableFloatingButton />
+          <SiteChrome>{children}</SiteChrome>
         </LanguageProvider>
       </body>
     </html>

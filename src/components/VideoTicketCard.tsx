@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { colorMap, type CardColor } from "@/lib/colors";
 import { loadYouTubeIframeApi, type YTPlayer } from "@/lib/youtubeIframeApi";
 import { useVideoPlayback } from "./VideoPlaybackContext";
 import { useLanguage } from "./LanguageContext";
@@ -20,18 +21,10 @@ const copy = {
   },
 };
 
-const colorMap: Record<string, string> = {
-  pink: "bg-pink-bright",
-  green: "bg-green",
-  orange: "bg-orange",
-  purple: "bg-purple",
-  blue: "bg-blue",
-};
-
 type Props = {
   videoId: string;
   title: string;
-  color: keyof typeof colorMap;
+  color: CardColor;
 };
 
 export default function VideoTicketCard({

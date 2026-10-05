@@ -1,24 +1,10 @@
 "use client";
 
+import type { PortfolioItem } from "@/lib/content";
 import VideoTicketCard from "./VideoTicketCard";
 import StackReveal from "./StackReveal";
 import { VideoPlaybackProvider } from "./VideoPlaybackContext";
 import { useLanguage } from "./LanguageContext";
-
-const reelsByLang = {
-  en: [
-    { videoId: "XrR7Gh5Jmcs", title: "REEL 01", color: "pink" },
-    { videoId: "SnEmOxlB-EA", title: "REEL 02", color: "green" },
-    { videoId: "M_4yjkXI_yI", title: "REEL 03", color: "orange" },
-    { videoId: "5zJyrTAYKLU", title: "REEL 04", color: "purple" },
-  ],
-  he: [
-    { videoId: "XrR7Gh5Jmcs", title: "קליפ 01", color: "pink" },
-    { videoId: "SnEmOxlB-EA", title: "קליפ 02", color: "green" },
-    { videoId: "M_4yjkXI_yI", title: "קליפ 03", color: "orange" },
-    { videoId: "5zJyrTAYKLU", title: "קליפ 04", color: "purple" },
-  ],
-} as const;
 
 const copy = {
   en: {
@@ -45,9 +31,8 @@ const copy = {
   },
 };
 
-export default function Portfolio() {
+export default function Portfolio({ items }: { items: PortfolioItem[] }) {
   const { lang } = useLanguage();
-  const reels = reelsByLang[lang];
   const t = copy[lang];
 
   return (
@@ -62,8 +47,13 @@ export default function Portfolio() {
 
         <VideoPlaybackProvider>
           <StackReveal className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {reels.map((reel) => (
-              <VideoTicketCard key={reel.videoId} {...reel} />
+            {items.map((item) => (
+              <VideoTicketCard
+                key={item.id}
+                videoId={item.videoId}
+                title={lang === "he" ? item.titleHe : item.titleEn}
+                color={item.color}
+              />
             ))}
           </StackReveal>
         </VideoPlaybackProvider>

@@ -3,10 +3,11 @@
 import {
   createContext,
   useContext,
-  useState,
   useCallback,
   useEffect,
+  useSyncExternalStore,
 } from "react";
+import { usePathname } from "next/navigation";
 
 export type Lang = "en" | "he";
 
@@ -19,10 +20,17 @@ type LanguageContextValue = {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-function applyDocumentAttrs(lang: Lang) {
+function applyDocumentAttrs(lang: Lang, isAdmin: boolean) {
+  if (isAdmin) {
+    document.documentElement.lang = "he";
+    document.documentElement.dir = "rtl";
+    return;
+  }
   document.documentElement.lang = lang === "he" ? "he" : "en";
   document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
 }
+
+const listeners = new Set<() => void>();
 
 function readStoredLang(): Lang {
   const stored = window.localStorage.getItem(STORAGE_KEY);
@@ -30,27 +38,29 @@ function readStoredLang(): Lang {
   return navigator.language.toLowerCase().startsWith("he") ? "he" : "en";
 }
 
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+function serverLang(): Lang {
+  return "en";
+}
+
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  // Always start with "en" so SSR and the first client render match
-  const [lang, setLang] = useState<Lang>("en");
+  // Server snapshot is always "en" so the first render matches SSR.
+  const lang = useSyncExternalStore(subscribe, readStoredLang, serverLang);
+  const isAdmin = usePathname().startsWith("/admin");
 
   useEffect(() => {
-    const stored = readStoredLang();
-    setLang(stored);
-    applyDocumentAttrs(stored);
-  }, []);
-
-  useEffect(() => {
-    applyDocumentAttrs(lang);
-  }, [lang]);
+    applyDocumentAttrs(lang, isAdmin);
+  }, [lang, isAdmin]);
 
   const toggle = useCallback(() => {
-    setLang((prev) => {
-      const next: Lang = prev === "en" ? "he" : "en";
-      window.localStorage.setItem(STORAGE_KEY, next);
-      return next;
-    });
-  }, []);
+    const next: Lang = lang === "en" ? "he" : "en";
+    window.localStorage.setItem(STORAGE_KEY, next);
+    listeners.forEach((listener) => listener());
+  }, [lang]);
 
   return (
     <LanguageContext.Provider value={{ lang, toggle }}>

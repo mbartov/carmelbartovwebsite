@@ -1,3 +1,4 @@
+import { getPublicPortfolio, getPublicTestimonials } from "@/lib/cms";
 import Ticker from "@/components/Ticker";
 import Hero from "@/components/Hero";
 import NameBanner from "@/components/NameBanner";
@@ -10,7 +11,12 @@ import Services from "@/components/Services";
 import Testimonials from "@/components/Testimonials";
 import Contact from "@/components/Contact";
 
-export default function Home() {
+export default async function Home() {
+  const [portfolio, testimonials] = await Promise.all([
+    getPublicPortfolio(),
+    getPublicTestimonials(),
+  ]);
+
   return (
     <div className="flex flex-1 flex-col">
       <Ticker />
@@ -19,11 +25,11 @@ export default function Home() {
         <NameBanner />
         <About />
         <Ribbon />
-        <Portfolio />
+        <Portfolio items={portfolio} />
         <Process />
         <Path />
         <Services />
-        <Testimonials />
+        <Testimonials items={testimonials} />
         <Contact />
       </main>
     </div>
