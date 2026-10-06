@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { Anton, Inter, Rubik } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider, type Lang } from "@/components/LanguageContext";
+import SiteAnalytics from "@/components/SiteAnalytics";
 import SiteChrome from "@/components/SiteChrome";
 
 const anton = Anton({
@@ -56,6 +57,7 @@ export default async function RootLayout({
         suppressHydrationWarning
         className="min-h-full flex flex-col bg-ink text-cream font-sans overflow-x-hidden overflow-y-visible"
       >
+        <SiteAnalytics />
         <LanguageProvider initialLang={initialLang}>
           <SiteChrome>{children}</SiteChrome>
         </LanguageProvider>

@@ -1,7 +1,8 @@
 "use client";
 
-import { serviceTagsByLang } from "@/lib/services";
+import { trackSiteEvent } from "@/lib/analytics";
 import { CONTACT_EMAIL } from "@/lib/contact";
+import { serviceTagsByLang } from "@/lib/services";
 import StackReveal from "./StackReveal";
 import { useLanguage } from "./LanguageContext";
 
@@ -93,6 +94,9 @@ export default function Services() {
               </span>
               <a
                 href={`mailto:${CONTACT_EMAIL}`}
+                onClick={() =>
+                  trackSiteEvent("Contact Click", lang, { place: "services", kind: "email" })
+                }
                 className="rounded-full bg-cream px-10 py-4 text-lg font-medium text-ink"
               >
                 {t.cta}

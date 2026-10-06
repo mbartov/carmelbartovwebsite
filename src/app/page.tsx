@@ -10,6 +10,7 @@ import Path from "@/components/Path";
 import Services from "@/components/Services";
 import Testimonials from "@/components/Testimonials";
 import Contact from "@/components/Contact";
+import SectionSeen from "@/components/SectionSeen";
 
 export default async function Home() {
   const [portfolio, testimonials] = await Promise.all([
@@ -20,6 +21,7 @@ export default async function Home() {
   return (
     <div className="flex flex-1 flex-col">
       <Ticker />
+      <SectionSeen />
       <main className="flex-1">
         <Hero />
         <NameBanner />

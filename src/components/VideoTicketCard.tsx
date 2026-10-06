@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { trackSiteEvent } from "@/lib/analytics";
 import { colorMap, type CardColor } from "@/lib/colors";
 import { loadYouTubeIframeApi, type YTPlayer } from "@/lib/youtubeIframeApi";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -35,6 +37,7 @@ export default function VideoTicketCard({
 }: Props) {
   const { activeId, play, stop } = useVideoPlayback();
   const { lang } = useLanguage();
+  const pathname = usePathname();
   const t = copy[lang];
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mountWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -152,6 +155,10 @@ export default function VideoTicketCard({
         player.pauseVideo();
         return;
       }
+      trackSiteEvent("Video Play", lang, {
+        title,
+        page: pathname === "/portfolio" ? "portfolio" : "home",
+      });
       player.unMute();
       player.playVideo();
     });

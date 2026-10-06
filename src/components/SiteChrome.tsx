@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import LanguageToggle from "./LanguageToggle";
+import VisitLanguage from "./VisitLanguage";
 
 export default function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -9,7 +10,12 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
 
   return (
     <>
-      {isAdmin ? null : <LanguageToggle />}
+      {isAdmin ? null : (
+        <>
+          <LanguageToggle />
+          <VisitLanguage />
+        </>
+      )}
       {children}
     </>
   );

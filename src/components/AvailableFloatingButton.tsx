@@ -1,5 +1,6 @@
 "use client";
 
+import { trackSiteEvent } from "@/lib/analytics";
 import { CONTACT_EMAIL } from "@/lib/contact";
 import { useLanguage } from "./LanguageContext";
 
@@ -27,6 +28,7 @@ export default function AvailableFloatingButton() {
       <span className="available-glow-frame" aria-hidden />
       <a
         href={`mailto:${CONTACT_EMAIL}`}
+        onClick={() => trackSiteEvent("Contact Click", lang, { place: "available", kind: "email" })}
         aria-label={label[lang]}
         className="pointer-events-auto relative z-10 flex max-w-[min(22rem,calc(100vw-3rem))] items-center gap-2.5 rounded-full bg-ink px-5 py-3 text-sm font-medium text-cream transition-transform duration-200 hover:-translate-y-0.5 sm:gap-4 sm:px-8 sm:py-4 sm:text-lg"
       >

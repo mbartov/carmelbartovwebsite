@@ -1,5 +1,6 @@
 "use client";
 
+import { trackSiteEvent } from "@/lib/analytics";
 import { useLanguage } from "./LanguageContext";
 
 export const LANGUAGE_TOGGLE_ID = "language-toggle";
@@ -65,7 +66,10 @@ export default function LanguageToggle() {
     <button
       id={LANGUAGE_TOGGLE_ID}
       type="button"
-      onClick={toggle}
+      onClick={() => {
+        toggle();
+        trackSiteEvent("Language", switchingToHebrew ? "he" : "en");
+      }}
       aria-label={switchingToHebrew ? "Switch to Hebrew" : "עבור לאנגלית"}
       title={switchingToHebrew ? "עברית" : "English"}
       className="group fixed right-4 top-4 z-50 h-12 w-12 overflow-hidden rounded-full border-2 border-ink shadow-[3px_3px_0_0_#161614] transition-transform hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_#161614] active:translate-y-0 active:shadow-[2px_2px_0_0_#161614] rtl:right-auto rtl:left-4"

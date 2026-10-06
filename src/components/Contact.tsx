@@ -1,5 +1,6 @@
 "use client";
 
+import { trackSiteEvent } from "@/lib/analytics";
 import { CONTACT_EMAIL, INSTAGRAM_URL, YOUTUBE_URL } from "@/lib/contact";
 import { useLanguage } from "./LanguageContext";
 import {
@@ -48,6 +49,9 @@ export default function Contact() {
 
             <a
               href={`mailto:${CONTACT_EMAIL}`}
+              onClick={() =>
+                trackSiteEvent("Contact Click", lang, { place: "contact", kind: "email" })
+              }
               className="mt-8 inline-block rounded-full bg-ink px-6 py-3 font-medium text-cream transition-transform hover:-translate-y-0.5"
             >
               {t.cta}
@@ -63,6 +67,9 @@ export default function Contact() {
               href={INSTAGRAM_URL}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() =>
+                trackSiteEvent("Contact Click", lang, { place: "contact", kind: "instagram" })
+              }
               className="flex h-12 w-12 items-center justify-center rounded-full bg-cream text-green"
               aria-label="Instagram"
             >
@@ -72,6 +79,9 @@ export default function Contact() {
               href={YOUTUBE_URL}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() =>
+                trackSiteEvent("Contact Click", lang, { place: "contact", kind: "youtube" })
+              }
               className="flex h-12 w-12 items-center justify-center rounded-full bg-cream text-green"
               aria-label="YouTube"
             >
@@ -79,6 +89,9 @@ export default function Contact() {
             </a>
             <a
               href={`mailto:${CONTACT_EMAIL}`}
+              onClick={() =>
+                trackSiteEvent("Contact Click", lang, { place: "contact", kind: "email" })
+              }
               className="flex h-12 w-12 items-center justify-center rounded-full bg-cream text-green"
               aria-label={lang === "en" ? "Email" : "אימייל"}
             >

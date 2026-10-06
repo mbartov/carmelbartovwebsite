@@ -1,9 +1,10 @@
 "use client";
 
+import { trackSiteEvent } from "@/lib/analytics";
+import { INSTAGRAM_URL, YOUTUBE_URL } from "@/lib/contact";
 import AvailableFloatingButton from "./AvailableFloatingButton";
 import Badge3D from "./Badge3DClient";
 import { useLanguage } from "./LanguageContext";
-import { INSTAGRAM_URL, YOUTUBE_URL } from "@/lib/contact";
 import { WireframeInstagram, WireframeYouTube } from "./SocialIcons";
 
 const nav = {
@@ -66,6 +67,7 @@ export default function Hero() {
           href={INSTAGRAM_URL}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackSiteEvent("Contact Click", lang, { place: "hero", kind: "instagram" })}
           className="flex h-12 w-12 items-center justify-center rounded-full bg-ink text-cream transition-transform hover:-translate-y-0.5"
           aria-label="Instagram"
         >
@@ -75,6 +77,7 @@ export default function Hero() {
           href={YOUTUBE_URL}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackSiteEvent("Contact Click", lang, { place: "hero", kind: "youtube" })}
           className="flex h-12 w-12 items-center justify-center rounded-full bg-ink text-cream transition-transform hover:-translate-y-0.5"
           aria-label="YouTube"
         >
